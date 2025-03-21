@@ -1,6 +1,9 @@
 from flask import Flask, jsonify, request
 import firebase_admin
 from firebase_admin import credentials, firestore
+import os
+
+
 
 # Cargar el archivo de credenciales desde la ruta absoluta
 cred = credentials.Certificate(r'C:\app-estudio-clean\firebase\app-escuela-c3504-firebase-adminsdk-fbsvc-27b9fd6d46.json')
@@ -25,4 +28,5 @@ def get_Lecciones():
     return jsonify(data)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))  # Usar el puerto proporcionado por Render
+    app.run(host='0.0.0.0', port=port, debug=True)
