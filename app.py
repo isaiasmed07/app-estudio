@@ -19,13 +19,14 @@ def get_lecciones():
     data = [{"id": leccion.id, "contenido": leccion.to_dict()} for leccion in lecciones]
     return jsonify(data)
 
-@app.route('/api/Lecciones', methods=['GET'])
-def get_Lecciones():
+@app.route('/api/clases', methods=['GET'])
+def get_clases():
     db = firestore.client()
-    Lecciones_ref = db.collection('Lecciones')  # Consulta la colección 'Lecciones'
-    Lecciones = Lecciones_ref.stream()
-    data = [{"id": leccion.id, "contenido": leccion.to_dict()} for leccion in Lecciones]
+    clases_ref = db.collection('clases')  # Accede a la colección 'clases'
+    clases = clases_ref.stream()
+    data = [{"id": clase.id, "contenido": clase.to_dict()} for clase in clases]
     return jsonify(data)
+
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))  # Usar el puerto proporcionado por Render
