@@ -22,7 +22,7 @@ def get_lecciones():
 @app.route('/api/clases', methods=['GET'])
 def get_clases():
     db = firestore.client()
-    clases_ref = db.collection('clases')  # Accede a la colección 'clases'
+    clases_ref = db.collection('Clases')  # Accede a la colección 'Clases' con C mayúscula
     clases = clases_ref.stream()
     data = [{"id": clase.id, "contenido": clase.to_dict()} for clase in clases]
     return jsonify(data)
