@@ -2,11 +2,11 @@ from flask import Flask, jsonify, request
 import firebase_admin
 from firebase_admin import credentials, firestore
 import os
+import json
 
-
-
-# Cargar el archivo de credenciales desde la ruta absoluta
-cred = credentials.Certificate(r'C:\app-estudio-clean\firebase\app-escuela-c3504-firebase-adminsdk-fbsvc-27b9fd6d46.json')
+# Cargar las credenciales desde la variable de entorno
+cred_json = os.environ.get("FIREBASE_CREDENTIALS")
+cred = credentials.Certificate(json.loads(cred_json))  # Convertir la cadena JSON en un diccionario
 firebase_admin.initialize_app(cred)
 
 app = Flask(__name__)
