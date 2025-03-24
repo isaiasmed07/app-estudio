@@ -2,8 +2,8 @@ const apiBaseUrl = 'https://app-estudio-docker.onrender.com/api';
 
 // Configuración de Auth0
 const auth0 = new Auth0Client({
-    domain: 'tu-dominio.auth0.com', // Reemplaza con tu Domain de Auth0
-    client_id: 'tu-client-id', // Reemplaza con tu Client ID de Auth0
+    domain: dev-vg0llritbkja3g86.us.auth0.com, // Reemplaza con tu Domain de Auth0
+    client_id: ncYW7gHwfN0N3mCZZRx4yUog7ExJ1zOI, // Reemplaza con tu Client ID de Auth0
     redirect_uri: 'https://app-estudio-en598kim4-isaias-medinas-projects.vercel.app'
 });
 
