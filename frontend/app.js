@@ -4,7 +4,7 @@ const apiBaseUrl = 'https://app-estudio-docker.onrender.com/api';
 const auth0 = new Auth0Client({
     domain: dev-vg0llritbkja3g86.us.auth0.com, // Reemplaza con tu Domain de Auth0
     client_id: ncYW7gHwfN0N3mCZZRx4yUog7ExJ1zOI, // Reemplaza con tu Client ID de Auth0
-    redirect_uri: 'https://app-estudio-en598kim4-isaias-medinas-projects.vercel.app'
+    redirect_uri: 'https://app-estudio.vercel.app'
 });
 
 // Función para iniciar sesión
@@ -19,7 +19,7 @@ async function login() {
 // Función para cerrar sesión
 async function logout() {
     try {
-        await auth0.logout({ returnTo: 'https://app-estudio-en598kim4-isaias-medinas-projects.vercel.app' });
+        await auth0.logout({ returnTo: 'https://app-estudio.vercel.app' });
     } catch (error) {
         console.error('Error durante el cierre de sesión:', error);
     }
