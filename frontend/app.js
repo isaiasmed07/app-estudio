@@ -1,9 +1,9 @@
-// Forzar la carga dinámica del script de Auth0
+// Verificar si el script de Auth0 se ha cargado dinámicamente
 const script = document.createElement('script');
-script.src = "https://cdn.auth0.com/js/auth0/9.18/auth0.min.js";
+script.src = "https://cdn.auth0.com/js/auth0/9.18/auth0.min.js"; // Cambiar a local si prefieres
 script.onload = () => {
     console.log("Script de Auth0 cargado correctamente.");
-    iniciarApp(); // Solo iniciamos la aplicación después de confirmar la carga del script
+    iniciarApp(); // Inicia la app cuando el script está listo
 };
 script.onerror = () => {
     console.error("Error al cargar el script de Auth0.");
@@ -19,9 +19,9 @@ function iniciarApp() {
 
     // Configuración de Auth0
     const auth0 = new Auth0Client({
-        domain: 'dev-vg0llritbkja3g86.us.auth0.com',
+        domain: 'dev-vg0llritbkja3g86.us.auth0.com', // Configuración de tu proyecto Auth0
         client_id: 'ncYW7gHwfN0N3mCZZRx4yUog7ExJ1zOI',
-        redirect_uri: 'https://app-estudio.vercel.app'
+        redirect_uri: 'https://app-estudio.vercel.app' // URL de redirección tras login
     });
 
     // Función para iniciar sesión
@@ -42,7 +42,7 @@ function iniciarApp() {
         }
     }
 
-    // Verificar si el usuario está autenticado
+    // Función para verificar si el usuario está autenticado
     async function checkAuth() {
         try {
             const isAuthenticated = await auth0.isAuthenticated();
@@ -53,7 +53,7 @@ function iniciarApp() {
 
                 console.log('Usuario autenticado:', user);
 
-                // Cargar contenido después de autenticar al usuario
+                // Cargar contenido después de autenticar
                 loadContent();
             } else {
                 document.getElementById('login-section').hidden = false;
@@ -99,9 +99,9 @@ function iniciarApp() {
         }
     }
 
-    // Asignar evento al botón de inicio de sesión
+    // Asignar eventos al botón de inicio de sesión
     document.getElementById('loginBtn').addEventListener('click', login);
 
-    // Ejecutar autenticación al cargar la página
+    // Ejecutar verificación de autenticación al cargar la página
     window.onload = checkAuth;
 }
