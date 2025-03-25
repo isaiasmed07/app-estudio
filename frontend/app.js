@@ -2,8 +2,8 @@
 const script = document.createElement('script');
 script.src = "https://cdn.auth0.com/js/auth0/9.18/auth0.min.js";
 script.onload = () => {
-    console.log("Auth0 script cargado correctamente.");
-    iniciarApp(); // Iniciar la aplicación después de cargar el script
+    console.log("Script de Auth0 cargado correctamente.");
+    iniciarApp(); // Solo iniciamos la aplicación después de confirmar la carga del script
 };
 script.onerror = () => {
     console.error("Error al cargar el script de Auth0.");
@@ -11,7 +11,7 @@ script.onerror = () => {
 document.head.appendChild(script);
 
 function iniciarApp() {
-    // Verifica si Auth0Client está disponible
+    // Verificar si Auth0Client está disponible
     if (typeof Auth0Client === "undefined") {
         console.error("Auth0Client no está definido. Asegúrate de que el script auth0.min.js se haya cargado.");
         return;
@@ -19,9 +19,9 @@ function iniciarApp() {
 
     // Configuración de Auth0
     const auth0 = new Auth0Client({
-        domain: 'dev-vg0llritbkja3g86.us.auth0.com', // Cambia al dominio correcto
-        client_id: 'ncYW7gHwfN0N3mCZZRx4yUog7ExJ1zOI', // Cambia al ID correcto
-        redirect_uri: 'https://app-estudio.vercel.app' // Redirección después del login
+        domain: 'dev-vg0llritbkja3g86.us.auth0.com',
+        client_id: 'ncYW7gHwfN0N3mCZZRx4yUog7ExJ1zOI',
+        redirect_uri: 'https://app-estudio.vercel.app'
     });
 
     // Función para iniciar sesión
@@ -81,7 +81,6 @@ function iniciarApp() {
     // Función para cargar contenido desde el backend
     async function loadContent() {
         try {
-            // Obtener datos de "lecciones"
             const lecciones = await fetchData('lecciones');
             const leccionesDiv = document.getElementById('lecciones');
             leccionesDiv.innerHTML = ''; // Limpia contenido anterior
@@ -89,7 +88,6 @@ function iniciarApp() {
                 leccionesDiv.innerHTML += `<p>${item.contenido.titulo}</p>`;
             });
 
-            // Obtener datos de "clases"
             const clases = await fetchData('clases');
             const clasesDiv = document.getElementById('clases');
             clasesDiv.innerHTML = ''; // Limpia contenido anterior
