@@ -1,9 +1,9 @@
 // Verificar si el script de Auth0 se ha cargado dinámicamente
 const script = document.createElement('script');
-script.src = "https://cdn.auth0.com/js/auth0/9.18/auth0.min.js"; // Cambiar a local si prefieres
+script.src = "https://cdn.auth0.com/js/auth0/9.18/auth0.min.js"; // Usar CDN directamente
 script.onload = () => {
     console.log("Script de Auth0 cargado correctamente.");
-    iniciarApp(); // Inicia la app cuando el script está listo
+    iniciarApp(); // Solo iniciar si Auth0Client está listo
 };
 script.onerror = () => {
     console.error("Error al cargar el script de Auth0.");
@@ -11,17 +11,17 @@ script.onerror = () => {
 document.head.appendChild(script);
 
 function iniciarApp() {
-    // Verificar si Auth0Client está disponible
-    if (typeof Auth0Client === "undefined") {
+    // Verificar si Auth0Client está disponible globalmente
+    if (typeof window.Auth0Client === "undefined") {
         console.error("Auth0Client no está definido. Asegúrate de que el script auth0.min.js se haya cargado.");
         return;
     }
 
     // Configuración de Auth0
     const auth0 = new Auth0Client({
-        domain: 'dev-vg0llritbkja3g86.us.auth0.com', // Configuración de tu proyecto Auth0
+        domain: 'dev-vg0llritbkja3g86.us.auth0.com',
         client_id: 'ncYW7gHwfN0N3mCZZRx4yUog7ExJ1zOI',
-        redirect_uri: 'https://app-estudio.vercel.app' // URL de redirección tras login
+        redirect_uri: 'https://app-estudio.vercel.app'
     });
 
     // Función para iniciar sesión
@@ -42,7 +42,7 @@ function iniciarApp() {
         }
     }
 
-    // Función para verificar si el usuario está autenticado
+    // Verificar si el usuario está autenticado
     async function checkAuth() {
         try {
             const isAuthenticated = await auth0.isAuthenticated();
@@ -53,7 +53,7 @@ function iniciarApp() {
 
                 console.log('Usuario autenticado:', user);
 
-                // Cargar contenido después de autenticar
+                // Cargar contenido después de autenticar al usuario
                 loadContent();
             } else {
                 document.getElementById('login-section').hidden = false;
