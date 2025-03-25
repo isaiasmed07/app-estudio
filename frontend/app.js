@@ -11,6 +11,12 @@ script.onerror = () => {
 document.head.appendChild(script);
 
 function iniciarApp() {
+    // Verifica si Auth0Client está disponible
+    if (typeof Auth0Client === "undefined") {
+        console.error("Auth0Client no está definido. Asegúrate de que el script auth0.min.js se haya cargado.");
+        return;
+    }
+
     // Configuración de Auth0
     const auth0 = new Auth0Client({
         domain: 'dev-vg0llritbkja3g86.us.auth0.com', // Cambia al dominio correcto
