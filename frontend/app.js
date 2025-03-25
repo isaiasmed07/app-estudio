@@ -1,3 +1,6 @@
+// URL base de tu backend en Render
+const apiBaseUrl = 'https://app-estudio-docker.onrender.com/api';
+
 // Forzar la carga dinámica del script de Auth0
 const script = document.createElement('script');
 script.src = "https://cdn.auth0.com/js/auth0/9.18/auth0.min.js"; // Usar CDN directamente
@@ -50,12 +53,55 @@ function iniciarApp() {
                 console.log('Usuario autenticado:', authResult);
                 document.getElementById('login-section').hidden = true;
                 document.getElementById('content-section').hidden = false;
-                // Aquí puedes cargar información adicional del usuario si es necesario
+
+                // Cargar contenido desde el backend
+                loadClases();
+                loadLecciones();
             } else {
                 document.getElementById('login-section').hidden = false;
                 document.getElementById('content-section').hidden = true;
             }
         });
+    }
+
+    // Función para obtener y mostrar las clases
+    async function loadClases() {
+        try {
+            const response = await fetch(`${apiBaseUrl}/clases`);
+            if (!response.ok) {
+                throw new Error(`Error al obtener las clases: ${response.statusText}`);
+            }
+            const clases = await response.json();
+
+            // Mostrar las clases en la sección correspondiente
+            const clasesDiv = document.getElementById('clases');
+            clasesDiv.innerHTML = ''; // Limpiar contenido previo
+            clases.forEach(clase => {
+                clasesDiv.innerHTML += `<p><strong>${clase.contenido.Matematicas}</strong>: ${clase.contenido.Descripcion}</p>`;
+            });
+        } catch (error) {
+            console.error('Error al cargar las clases:', error);
+        }
+    }
+
+    // Función para obtener y mostrar las lecciones
+    async function loadLecciones() {
+        try {
+            const response = await fetch(`${apiBaseUrl}/lecciones`);
+            if (!response.ok) {
+                throw new Error(`Error al obtener las lecciones: ${response.statusText}`);
+            }
+            const lecciones = await response.json();
+
+            // Mostrar las lecciones en la sección correspondiente
+            const leccionesDiv = document.getElementById('lecciones');
+            leccionesDiv.innerHTML = ''; // Limpiar contenido previo
+            lecciones.forEach(leccion => {
+                leccionesDiv.innerHTML += `<p>${leccion.contenido.titulo}</p>`;
+            });
+        } catch (error) {
+            console.error('Error al cargar las lecciones:', error);
+        }
     }
 
     // Asignar eventos al botón de inicio de sesión
