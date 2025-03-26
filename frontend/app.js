@@ -1,6 +1,15 @@
 // URL base de tu backend en Render
 const apiBaseUrl = 'https://app-estudio-docker.onrender.com/api';
 
+// Configuración del cliente Auth0
+const auth0Client = new auth0.WebAuth({
+    domain: 'dev-vg0llritbkja3g86.us.auth0.com', // Reemplaza con tu dominio Auth0
+    clientID: 'ncYW7gHwfN0N3mCZZRx4yUog7ExJ1zOI', // Reemplaza con tu Client ID
+    redirectUri: 'https://app-estudio.vercel.app', // URL de redirección en Auth0
+    responseType: 'token id_token',
+    scope: 'openid profile email'
+});
+
 // Función para cargar clases
 async function loadClases() {
     try {
@@ -62,8 +71,44 @@ async function showDetails(type, id) {
     }
 }
 
-// Cargar clases y lecciones al inicio
-window.onload = () => {
-    loadClases();
-    loadLecciones();
-};
+// Función para iniciar sesión
+function login() {
+    auth0Client.authorize();
+}
+
+// Función para manejar el inicio de sesión después de la redirección
+function handleAuthentication() {
+    auth0Client.parseHash((err, authResult) => {
+        if (err) {
+            console.error('Error al manejar la autenticación:', err);
+            return;
+        }
+        if (authResult && authResult.accessToken && authResult.idToken) {
+            console.log('Autenticación exitosa:', authResult);
+            guardarSesion(authResult);
+            mostrarContenido();
+        } else {
+            console.log('No hay datos de autenticación disponibles.');
+        }
+    });
+}
+
+// Función para guardar los datos de la sesión
+function guardarSesion(authResult) {
+    localStorage.setItem('accessToken', authResult.accessToken);
+    localStorage.setItem('idToken', authResult.idToken);
+}
+
+// Función para mostrar el contenido después de iniciar sesión
+function mostrarContenido() {
+    document.getElementById('login-section').hidden = true;
+    document.getElementById('content-section').hidden = false;
+    loadClases(); // Cargar Clases
+    loadLecciones(); // Cargar Lecciones
+}
+
+// Asignar evento al botón de inicio de sesión
+document.getElementById('loginBtn').addEventListener('click', login);
+
+// Verificar estado de autenticación al cargar la página
+window.onload = handleAuthentication;
