@@ -60,14 +60,27 @@ window.login = function () {
 
 // Manejar la autenticación después de redirección
 window.handleAuthentication = function () {
+    console.log('Procesando autenticación...');
     auth0Client.parseHash((err, authResult) => {
         if (err) {
             console.error('Error al manejar la autenticación:', err);
             return;
         }
+
         if (authResult && authResult.accessToken && authResult.idToken) {
             console.log('Autenticación exitosa:', authResult);
             guardarSesion(authResult);
+
+            // Mostrar el contenido protegido
+            const loginSection = document.getElementById('login-section');
+            const contentSection = document.getElementById('content-section');
+            if (loginSection && contentSection) {
+                loginSection.hidden = true;
+                contentSection.hidden = false;
+                console.log('Contenido protegido mostrado.');
+            } else {
+                console.error('No se encontraron las secciones del DOM necesarias.');
+            }
         } else {
             console.log('No hay datos de autenticación disponibles.');
         }
@@ -78,6 +91,24 @@ window.handleAuthentication = function () {
 window.guardarSesion = function (authResult) {
     localStorage.setItem('accessToken', authResult.accessToken);
     localStorage.setItem('idToken', authResult.idToken);
+    console.log('Sesión guardada en el almacenamiento local.');
+};
+
+// Verificar si ya hay una sesión activa
+window.verificarSesion = function () {
+    const accessToken = localStorage.getItem('accessToken');
+    const idToken = localStorage.getItem('idToken');
+    if (accessToken && idToken) {
+        console.log('Sesión existente detectada, mostrando contenido protegido...');
+        const loginSection = document.getElementById('login-section');
+        const contentSection = document.getElementById('content-section');
+        if (loginSection && contentSection) {
+            loginSection.hidden = true;
+            contentSection.hidden = false;
+        }
+    } else {
+        console.log('No se encontró una sesión activa.');
+    }
 };
 
 // Asignar evento al botón de inicio de sesión
@@ -92,14 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         console.error('Botón de inicio de sesión no encontrado.');
     }
-});
 
-// Manejar autenticación automáticamente cuando la página se carga
-window.onload = () => {
-    console.log('Cargando autenticación...');
-    if (typeof handleAuthentication === 'function') {
-        handleAuthentication();
-    } else {
-        console.error('La función handleAuthentication no está definida.');
-    }
-};
+    // Verificar si hay una sesión activa
+    verificarSesion();
+});
