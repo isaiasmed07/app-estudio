@@ -54,6 +54,7 @@ window.loadLecciones = async function () {
 
 // Función para iniciar sesión
 window.login = function () {
+    console.log('Iniciando sesión...');
     auth0Client.authorize();
 };
 
@@ -77,4 +78,28 @@ window.handleAuthentication = function () {
 window.guardarSesion = function (authResult) {
     localStorage.setItem('accessToken', authResult.accessToken);
     localStorage.setItem('idToken', authResult.idToken);
+};
+
+// Asignar evento al botón de inicio de sesión
+document.addEventListener('DOMContentLoaded', () => {
+    const loginButton = document.getElementById('loginBtn');
+    if (loginButton) {
+        console.log('Botón de inicio de sesión encontrado, asignando evento...');
+        loginButton.addEventListener('click', () => {
+            console.log('Botón de inicio de sesión clicado.');
+            login();
+        });
+    } else {
+        console.error('Botón de inicio de sesión no encontrado.');
+    }
+});
+
+// Manejar autenticación automáticamente cuando la página se carga
+window.onload = () => {
+    console.log('Cargando autenticación...');
+    if (typeof handleAuthentication === 'function') {
+        handleAuthentication();
+    } else {
+        console.error('La función handleAuthentication no está definida.');
+    }
 };
