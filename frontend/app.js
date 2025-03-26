@@ -10,7 +10,7 @@ const auth0Client = new auth0.WebAuth({
     scope: 'openid profile email'
 });
 
-// Función para cargar clases
+// Función para cargar clases y mostrar detalles
 async function loadClases() {
     try {
         const response = await fetch(`${apiBaseUrl}/clases`);
@@ -19,20 +19,19 @@ async function loadClases() {
         }
         const clases = await response.json();
 
-        // Mostrar clases como enlaces dinámicos
-        const clasesDiv = document.getElementById('clases');
-        clasesDiv.innerHTML = ''; // Limpiar contenido previo
+        // Mostrar detalles en la sección correspondiente
+        const detailsDiv = document.getElementById('details');
+        detailsDiv.innerHTML = '<h3>Clases:</h3>'; // Encabezado de detalles
         clases.forEach(clase => {
-            clasesDiv.innerHTML += `
-                <a href="javascript:void(0)" onclick="showDetails('clases', '${clase.id}')">${clase.contenido.Matematicas}</a><br>
-            `;
+            detailsDiv.innerHTML += `<p>${clase.contenido.Matematicas}: ${clase.contenido.Descripcion}</p>`;
         });
+        document.getElementById('details-section').hidden = false; // Mostrar sección de detalles
     } catch (error) {
         console.error('Error al cargar las clases:', error);
     }
 }
 
-// Función para cargar lecciones
+// Función para cargar lecciones y mostrar detalles
 async function loadLecciones() {
     try {
         const response = await fetch(`${apiBaseUrl}/lecciones`);
@@ -41,33 +40,15 @@ async function loadLecciones() {
         }
         const lecciones = await response.json();
 
-        // Mostrar lecciones como enlaces dinámicos
-        const leccionesDiv = document.getElementById('lecciones');
-        leccionesDiv.innerHTML = ''; // Limpiar contenido previo
+        // Mostrar detalles en la sección correspondiente
+        const detailsDiv = document.getElementById('details');
+        detailsDiv.innerHTML = '<h3>Lecciones:</h3>'; // Encabezado de detalles
         lecciones.forEach(leccion => {
-            leccionesDiv.innerHTML += `
-                <a href="javascript:void(0)" onclick="showDetails('lecciones', '${leccion.id}')">${leccion.contenido.titulo}</a><br>
-            `;
+            detailsDiv.innerHTML += `<p>${leccion.contenido.titulo}</p>`;
         });
+        document.getElementById('details-section').hidden = false; // Mostrar sección de detalles
     } catch (error) {
         console.error('Error al cargar las lecciones:', error);
-    }
-}
-
-// Función para mostrar los detalles al hacer clic en un enlace
-async function showDetails(type, id) {
-    try {
-        const response = await fetch(`${apiBaseUrl}/${type}/${id}`);
-        if (!response.ok) {
-            throw new Error(`Error al obtener los detalles: ${response.statusText}`);
-        }
-        const details = await response.json();
-
-        const detailsDiv = document.getElementById('details');
-        detailsDiv.innerHTML = ''; // Limpiar contenido previo
-        detailsDiv.innerHTML = `<h3>Detalles:</h3><p>${details.contenido.Descripcion || 'No hay descripción disponible.'}</p>`;
-    } catch (error) {
-        console.error('Error al mostrar los detalles:', error);
     }
 }
 
@@ -103,8 +84,6 @@ function guardarSesion(authResult) {
 function mostrarContenido() {
     document.getElementById('login-section').hidden = true;
     document.getElementById('content-section').hidden = false;
-    loadClases(); // Cargar Clases
-    loadLecciones(); // Cargar Lecciones
 }
 
 // Asignar evento al botón de inicio de sesión
