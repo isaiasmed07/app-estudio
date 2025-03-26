@@ -20,6 +20,8 @@ async function loadClases() {
         const clases = await response.json();
 
         const clasesDiv = document.getElementById('clases');
+        if (!clasesDiv) throw new Error("Elemento con ID 'clases' no encontrado en el DOM.");
+
         clasesDiv.innerHTML = '<h3>Clases:</h3>'; // Encabezado para las clases
         clases.forEach(clase => {
             clasesDiv.innerHTML += `<p><strong>${clase.contenido.Matematicas}</strong>: ${clase.contenido.Descripcion}</p>`;
@@ -39,6 +41,8 @@ async function loadLecciones() {
         const lecciones = await response.json();
 
         const leccionesDiv = document.getElementById('lecciones');
+        if (!leccionesDiv) throw new Error("Elemento con ID 'lecciones' no encontrado en el DOM.");
+
         leccionesDiv.innerHTML = '<h3>Lecciones:</h3>'; // Encabezado para las lecciones
         lecciones.forEach(leccion => {
             leccionesDiv.innerHTML += `<p><strong>${leccion.contenido.titulo}</strong></p>`;
@@ -78,12 +82,20 @@ function guardarSesion(authResult) {
 
 // Función para mostrar el contenido después de iniciar sesión
 function mostrarContenido() {
-    document.getElementById('login-section').hidden = true;
-    document.getElementById('content-section').hidden = false;
+    const loginSection = document.getElementById('login-section');
+    const contentSection = document.getElementById('content-section');
+    if (loginSection && contentSection) {
+        loginSection.hidden = true;
+        contentSection.hidden = false;
+    }
 }
 
 // Asignar evento al botón de inicio de sesión
-document.getElementById('loginBtn').addEventListener('click', login);
+document.getElementById('loginBtn')?.addEventListener('click', login);
 
 // Verificar estado de autenticación al cargar la página
-window.onload = handleAuthentication;
+window.onload = () => {
+    if (typeof handleAuthentication === "function") {
+        handleAuthentication();
+    }
+};
