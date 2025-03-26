@@ -3,14 +3,14 @@ const apiBaseUrl = 'https://app-estudio-docker.onrender.com/api';
 
 // Configuración del cliente Auth0
 const auth0Client = new auth0.WebAuth({
-    domain: 'dev-vg0llritbkja3g86.us.auth0.com', // Reemplaza con tu dominio Auth0
-    clientID: 'ncYW7gHwfN0N3mCZZRx4yUog7ExJ1zOI', // Reemplaza con tu Client ID
-    redirectUri: 'https://app-estudio.vercel.app', // URL de redirección en Auth0
+    domain: 'dev-vg0llritbkja3g86.us.auth0.com',
+    clientID: 'ncYW7gHwfN0N3mCZZRx4yUog7ExJ1zOI',
+    redirectUri: 'https://app-estudio.vercel.app',
     responseType: 'token id_token',
     scope: 'openid profile email'
 });
 
-// Función para cargar clases y renderizarlas en la página clases.html
+// Función para cargar clases
 async function loadClases() {
     try {
         const response = await fetch(`${apiBaseUrl}/clases`);
@@ -20,9 +20,9 @@ async function loadClases() {
         const clases = await response.json();
 
         const clasesDiv = document.getElementById('clases');
-        if (!clasesDiv) throw new Error("Elemento con ID 'clases' no encontrado en el DOM.");
+        if (!clasesDiv) throw new Error("El contenedor con ID 'clases' no se encontró en el DOM.");
 
-        clasesDiv.innerHTML = '<h3>Clases:</h3>'; // Encabezado para las clases
+        clasesDiv.innerHTML = '<h3>Clases:</h3>';
         clases.forEach(clase => {
             clasesDiv.innerHTML += `<p><strong>${clase.contenido.Matematicas}</strong>: ${clase.contenido.Descripcion}</p>`;
         });
@@ -31,7 +31,7 @@ async function loadClases() {
     }
 }
 
-// Función para cargar lecciones y renderizarlas en la página lecciones.html
+// Función para cargar lecciones
 async function loadLecciones() {
     try {
         const response = await fetch(`${apiBaseUrl}/lecciones`);
@@ -41,9 +41,9 @@ async function loadLecciones() {
         const lecciones = await response.json();
 
         const leccionesDiv = document.getElementById('lecciones');
-        if (!leccionesDiv) throw new Error("Elemento con ID 'lecciones' no encontrado en el DOM.");
+        if (!leccionesDiv) throw new Error("El contenedor con ID 'lecciones' no se encontró en el DOM.");
 
-        leccionesDiv.innerHTML = '<h3>Lecciones:</h3>'; // Encabezado para las lecciones
+        leccionesDiv.innerHTML = '<h3>Lecciones:</h3>';
         lecciones.forEach(leccion => {
             leccionesDiv.innerHTML += `<p><strong>${leccion.contenido.titulo}</strong></p>`;
         });
@@ -57,7 +57,7 @@ function login() {
     auth0Client.authorize();
 }
 
-// Función para manejar el inicio de sesión después de la redirección
+// Manejar la autenticación después de redirección
 function handleAuthentication() {
     auth0Client.parseHash((err, authResult) => {
         if (err) {
@@ -67,35 +67,14 @@ function handleAuthentication() {
         if (authResult && authResult.accessToken && authResult.idToken) {
             console.log('Autenticación exitosa:', authResult);
             guardarSesion(authResult);
-            mostrarContenido();
         } else {
             console.log('No hay datos de autenticación disponibles.');
         }
     });
 }
 
-// Función para guardar los datos de la sesión
+// Guardar sesión en almacenamiento local
 function guardarSesion(authResult) {
     localStorage.setItem('accessToken', authResult.accessToken);
     localStorage.setItem('idToken', authResult.idToken);
 }
-
-// Función para mostrar el contenido después de iniciar sesión
-function mostrarContenido() {
-    const loginSection = document.getElementById('login-section');
-    const contentSection = document.getElementById('content-section');
-    if (loginSection && contentSection) {
-        loginSection.hidden = true;
-        contentSection.hidden = false;
-    }
-}
-
-// Asignar evento al botón de inicio de sesión
-document.getElementById('loginBtn')?.addEventListener('click', login);
-
-// Verificar estado de autenticación al cargar la página
-window.onload = () => {
-    if (typeof handleAuthentication === "function") {
-        handleAuthentication();
-    }
-};
