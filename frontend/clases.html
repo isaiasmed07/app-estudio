@@ -22,15 +22,9 @@
             <div id="clases"></div>
         </section>
     </main>
+    <!-- Ejecutar la función al cargar -->
     <script>
-        // Llama a la función para cargar clases al cargar la página
-        window.onload = () => {
-            if (typeof loadClases === 'function') {
-                loadClases();
-            } else {
-                console.error('La función loadClases no está definida.');
-            }
-        };
+        window.onload = () => loadClases();
     </script>
 </body>
 </html>

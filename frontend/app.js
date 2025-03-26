@@ -11,7 +11,7 @@ const auth0Client = new auth0.WebAuth({
 });
 
 // Función para cargar clases
-async function loadClases() {
+window.loadClases = async function () {
     try {
         const response = await fetch(`${apiBaseUrl}/clases`);
         if (!response.ok) {
@@ -29,10 +29,10 @@ async function loadClases() {
     } catch (error) {
         console.error('Error al cargar las clases:', error);
     }
-}
+};
 
 // Función para cargar lecciones
-async function loadLecciones() {
+window.loadLecciones = async function () {
     try {
         const response = await fetch(`${apiBaseUrl}/lecciones`);
         if (!response.ok) {
@@ -50,15 +50,15 @@ async function loadLecciones() {
     } catch (error) {
         console.error('Error al cargar las lecciones:', error);
     }
-}
+};
 
 // Función para iniciar sesión
-function login() {
+window.login = function () {
     auth0Client.authorize();
-}
+};
 
 // Manejar la autenticación después de redirección
-function handleAuthentication() {
+window.handleAuthentication = function () {
     auth0Client.parseHash((err, authResult) => {
         if (err) {
             console.error('Error al manejar la autenticación:', err);
@@ -71,10 +71,10 @@ function handleAuthentication() {
             console.log('No hay datos de autenticación disponibles.');
         }
     });
-}
+};
 
 // Guardar sesión en almacenamiento local
-function guardarSesion(authResult) {
+window.guardarSesion = function (authResult) {
     localStorage.setItem('accessToken', authResult.accessToken);
     localStorage.setItem('idToken', authResult.idToken);
-}
+};
