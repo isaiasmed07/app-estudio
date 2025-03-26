@@ -10,7 +10,7 @@ const auth0Client = new auth0.WebAuth({
     scope: 'openid profile email'
 });
 
-// Función para cargar clases y mostrar detalles
+// Función para cargar clases y renderizarlas en la página clases.html
 async function loadClases() {
     try {
         const response = await fetch(`${apiBaseUrl}/clases`);
@@ -19,19 +19,17 @@ async function loadClases() {
         }
         const clases = await response.json();
 
-        // Mostrar detalles en la sección correspondiente
-        const detailsDiv = document.getElementById('details');
-        detailsDiv.innerHTML = '<h3>Clases:</h3>'; // Encabezado de detalles
+        const clasesDiv = document.getElementById('clases');
+        clasesDiv.innerHTML = '<h3>Clases:</h3>'; // Encabezado para las clases
         clases.forEach(clase => {
-            detailsDiv.innerHTML += `<p>${clase.contenido.Matematicas}: ${clase.contenido.Descripcion}</p>`;
+            clasesDiv.innerHTML += `<p><strong>${clase.contenido.Matematicas}</strong>: ${clase.contenido.Descripcion}</p>`;
         });
-        document.getElementById('details-section').hidden = false; // Mostrar sección de detalles
     } catch (error) {
         console.error('Error al cargar las clases:', error);
     }
 }
 
-// Función para cargar lecciones y mostrar detalles
+// Función para cargar lecciones y renderizarlas en la página lecciones.html
 async function loadLecciones() {
     try {
         const response = await fetch(`${apiBaseUrl}/lecciones`);
@@ -40,13 +38,11 @@ async function loadLecciones() {
         }
         const lecciones = await response.json();
 
-        // Mostrar detalles en la sección correspondiente
-        const detailsDiv = document.getElementById('details');
-        detailsDiv.innerHTML = '<h3>Lecciones:</h3>'; // Encabezado de detalles
+        const leccionesDiv = document.getElementById('lecciones');
+        leccionesDiv.innerHTML = '<h3>Lecciones:</h3>'; // Encabezado para las lecciones
         lecciones.forEach(leccion => {
-            detailsDiv.innerHTML += `<p>${leccion.contenido.titulo}</p>`;
+            leccionesDiv.innerHTML += `<p><strong>${leccion.contenido.titulo}</strong></p>`;
         });
-        document.getElementById('details-section').hidden = false; // Mostrar sección de detalles
     } catch (error) {
         console.error('Error al cargar las lecciones:', error);
     }
