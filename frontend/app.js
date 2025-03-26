@@ -11,6 +11,7 @@ const auth0Client = new auth0.WebAuth({
 });
 
 // Función para cargar clases
+// Función para cargar clases
 async function loadClases() {
     try {
         const response = await fetch(`${apiBaseUrl}/clases`);
@@ -24,7 +25,7 @@ async function loadClases() {
         clasesDiv.innerHTML = ''; // Limpiar contenido previo
         clases.forEach(clase => {
             clasesDiv.innerHTML += `
-                <a href="#" onclick="showDetails('clases', '${clase.id}')">${clase.contenido.Matematicas}</a><br>
+                <a href="javascript:void(0)" onclick="showDetails('clases', '${clase.id}')">${clase.contenido.Matematicas}</a><br>
             `;
         });
     } catch (error) {
@@ -46,7 +47,7 @@ async function loadLecciones() {
         leccionesDiv.innerHTML = ''; // Limpiar contenido previo
         lecciones.forEach(leccion => {
             leccionesDiv.innerHTML += `
-                <a href="#" onclick="showDetails('lecciones', '${leccion.id}')">${leccion.contenido.titulo}</a><br>
+                <a href="javascript:void(0)" onclick="showDetails('lecciones', '${leccion.id}')">${leccion.contenido.titulo}</a><br>
             `;
         });
     } catch (error) {
@@ -70,6 +71,7 @@ async function showDetails(type, id) {
         console.error('Error al mostrar los detalles:', error);
     }
 }
+
 
 // Función para iniciar sesión
 function login() {
