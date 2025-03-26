@@ -11,7 +11,6 @@ const auth0Client = new auth0.WebAuth({
 });
 
 // Función para cargar clases
-// Función para cargar clases
 async function loadClases() {
     try {
         const response = await fetch(`${apiBaseUrl}/clases`);
@@ -66,12 +65,11 @@ async function showDetails(type, id) {
 
         const detailsDiv = document.getElementById('details');
         detailsDiv.innerHTML = ''; // Limpiar contenido previo
-        detailsDiv.innerHTML = `<p>${JSON.stringify(details.contenido)}</p>`;
+        detailsDiv.innerHTML = `<h3>Detalles:</h3><p>${details.contenido.Descripcion}</p>`;
     } catch (error) {
         console.error('Error al mostrar los detalles:', error);
     }
 }
-
 
 // Función para iniciar sesión
 function login() {
