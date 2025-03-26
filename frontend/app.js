@@ -23,7 +23,6 @@ async function loadClases() {
         const clasesDiv = document.getElementById('clases');
         clasesDiv.innerHTML = ''; // Limpiar contenido previo
         clases.forEach(clase => {
-            console.log('Cargando clase:', clase); // Mensaje para depurar
             clasesDiv.innerHTML += `
                 <a href="javascript:void(0)" onclick="showDetails('clases', '${clase.id}')">${clase.contenido.Matematicas}</a><br>
             `;
@@ -46,7 +45,6 @@ async function loadLecciones() {
         const leccionesDiv = document.getElementById('lecciones');
         leccionesDiv.innerHTML = ''; // Limpiar contenido previo
         lecciones.forEach(leccion => {
-            console.log('Cargando lección:', leccion); // Mensaje para depurar
             leccionesDiv.innerHTML += `
                 <a href="javascript:void(0)" onclick="showDetails('lecciones', '${leccion.id}')">${leccion.contenido.titulo}</a><br>
             `;
@@ -58,7 +56,6 @@ async function loadLecciones() {
 
 // Función para mostrar los detalles al hacer clic en un enlace
 async function showDetails(type, id) {
-    console.log(`Ejecutando showDetails para ${type} con ID ${id}`); // Mensaje para depurar
     try {
         const response = await fetch(`${apiBaseUrl}/${type}/${id}`);
         if (!response.ok) {
@@ -68,7 +65,7 @@ async function showDetails(type, id) {
 
         const detailsDiv = document.getElementById('details');
         detailsDiv.innerHTML = ''; // Limpiar contenido previo
-        detailsDiv.innerHTML = `<h3>Detalles:</h3><p>${details.contenido.Descripcion}</p>`;
+        detailsDiv.innerHTML = `<h3>Detalles:</h3><p>${details.contenido.Descripcion || 'No hay descripción disponible.'}</p>`;
     } catch (error) {
         console.error('Error al mostrar los detalles:', error);
     }
