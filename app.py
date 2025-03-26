@@ -11,23 +11,57 @@ cred = credentials.Certificate(json.loads(cred_json))  # Convertir la cadena JSO
 firebase_admin.initialize_app(cred)
 
 app = Flask(__name__)
-CORS(app)  # Habilitar CORS para todas las rutas
+
+# Configuración de CORS: Permitir únicamente solicitudes desde Vercel
+CORS(app, resources={r"/api/*": {"origins": "https://app-estudio.vercel.app"}})
 
 @app.route('/api/lecciones', methods=['GET'])
 def get_lecciones():
-    db = firestore.client()
-    lecciones_ref = db.collection('lecciones')  # Consulta la colección 'lecciones'
-    lecciones = lecciones_ref.stream()
-    data = [{"id": leccion.id, "contenido": leccion.to_dict()} for leccion in lecciones]
-    return jsonify(data)
+    try:
+        db = firestore.client()
+        lecciones_ref = db.collection('lecciones')  # Consulta la colección 'lecciones'
+        lecciones = lecciones_ref.stream()
+        data = [{"id": leccion.id, "contenido": leccion.to_dict()} for leccion in lecciones]
+        return jsonify(data), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/clases', methods=['GET'])
 def get_clases():
-    db = firestore.client()
-    clases_ref = db.collection('Clases')  # Accede a la colección 'Clases' con C mayúscula
-    clases = clases_ref.stream()
-    data = [{"id": clase.id, "contenido": clase.to_dict()} for clase in clases]
-    return jsonify(data)
+    try:
+        db = firestore.client()
+        clases_ref = db.collection('Clases')  # Accede a la colección 'Clases' con C mayúscula
+        clases = clases_ref.stream()
+        data = [{"id": clase.id, "contenido": clase.to_dict()} for clase in clases]
+        return jsonify(data), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/lecciones/<leccion_id>', methods=['GET'])
+def get_leccion(leccion_id):
+    try:
+        db = firestore.client()
+        leccion_ref = db.collection('lecciones').document(leccion_id)
+        leccion = leccion_ref.get()
+        if leccion.exists:
+            return jsonify({"contenido": leccion.to_dict()}), 200
+        else:
+            return jsonify({"error": "Lección no encontrada"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/clases/<clase_id>', methods=['GET'])
+def get_clase(clase_id):
+    try:
+        db = firestore.client()
+        clase_ref = db.collection('Clases').document(clase_id)
+        clase = clase_ref.get()
+        if clase.exists:
+            return jsonify({"contenido": clase.to_dict()}), 200
+        else:
+            return jsonify({"error": "Clase no encontrada"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))  # Usar el puerto proporcionado por Render
