@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clases</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Importar scripts -->
     <script src="./js/auth0.min.js" defer></script>
     <script src="app.js" defer></script>
 </head>
@@ -22,9 +21,17 @@
             <div id="clases"></div>
         </section>
     </main>
-    <!-- Ejecutar la función al cargar -->
     <script>
-        window.onload = () => loadClases();
+        document.addEventListener('DOMContentLoaded', () => {
+            const accessToken = localStorage.getItem('accessToken');
+            if (!accessToken) {
+                console.log('Usuario no autenticado, redirigiendo a la página principal...');
+                window.location.href = 'index.html';
+            } else {
+                console.log('Usuario autenticado, cargando contenido de clases...');
+                loadClases();
+            }
+        });
     </script>
 </body>
 </html>
