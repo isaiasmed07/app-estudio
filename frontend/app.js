@@ -71,6 +71,9 @@ window.handleAuthentication = function () {
             console.log('Autenticación exitosa:', authResult);
             guardarSesion(authResult);
 
+            // Quitar el hash de la URL
+            window.history.replaceState({}, document.title, '/');
+
             // Mostrar el contenido protegido
             const loginSection = document.getElementById('login-section');
             const contentSection = document.getElementById('content-section');
@@ -124,6 +127,10 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Botón de inicio de sesión no encontrado.');
     }
 
-    // Verificar si hay una sesión activa
-    verificarSesion();
+    // Verificar si hay una sesión activa o manejar autenticación
+    if (window.location.hash.includes('access_token')) {
+        handleAuthentication();
+    } else {
+        verificarSesion();
+    }
 });
