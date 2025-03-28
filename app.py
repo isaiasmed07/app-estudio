@@ -62,6 +62,31 @@ def get_clase(clase_id):
             return jsonify({"error": "Clase no encontrada"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+
+
+# Inicializar Firebase
+cred = credentials.Certificate('firebase/credentials.json')  # Ruta al archivo JSON de credenciales
+firebase_admin.initialize_app(cred)
+
+
+
+@app.route('/api/libros', methods=['GET'])
+def get_libro():
+    grado = request.args.get('grado')
+    materia = request.args.get('materia')
+
+    db = firestore.client()
+    libros_ref = db.collection('libros')
+    query = libros_ref.where('grado', '==', grado).where('materia', '==', materia)
+    resultados = query.stream()
+
+    libros = [doc.to_dict() for doc in resultados]
+    if libros:
+        return jsonify(libros[0])  # Devuelve el primer libro encontrado
+    return jsonify({"error": "Libro no encontrado"}), 404
+
+
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))  # Usar el puerto proporcionado por Render

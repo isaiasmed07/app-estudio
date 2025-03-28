@@ -11,18 +11,38 @@
     <script src="app.js" defer></script>
 </head>
 <body>
-    <header>
-        <h1>Bienvenido a la Plataforma Educativa</h1>
+    <header class="header">
+        <h1>🌟 Plataforma Educativa 🌟</h1>
+        <p>Accede al conocimiento con facilidad y diversión</p>
     </header>
     <main>
-        <section id="login-section">
-            <button id="loginBtn">Iniciar sesión</button>
+        <section id="login-section" class="section-center">
+            <h2>Comienza tu aprendizaje</h2>
+            <button id="loginBtn" class="btn-primary">Iniciar sesión</button>
         </section>
-        <section id="content-section" hidden>
-            <!-- Enlaces para redirigir a Lecciones y Clases -->
-            <h2><a href="lecciones.html">Lecciones</a></h2>
-            <h2><a href="clases.html">Clases</a></h2>
+        <section id="content-section" class="section-center">
+            <h2>Explora el contenido educativo</h2>
+            <div class="card-container">
+                <div class="card">
+                    <h3>📚 Sociales Primer Grado</h3>
+                    <p>Accede al libro digitalizado de Sociales</p>
+                    <button onclick="cargarLibro('primer-grado', 'sociales')" class="btn-primary">
+                        Abrir Sociales
+                    </button>
+                </div>
+                <a href="lecciones.html" class="card">
+                    <h3>📝 Lecciones</h3>
+                    <p>Descubre temas educativos paso a paso</p>
+                </a>
+                <a href="clases.html" class="card">
+                    <h3>🧑‍🏫 Clases</h3>
+                    <p>Accede a clases interactivas</p>
+                </a>
+            </div>
         </section>
     </main>
+    <footer class="footer">
+        <p>© 2025 Plataforma Educativa. Todos los derechos reservados.</p>
+    </footer>
 </body>
 </html>

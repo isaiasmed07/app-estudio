@@ -52,6 +52,64 @@ window.loadLecciones = async function () {
     }
 };
 
+// Función para cargar y redirigir al libro
+window.cargarLibro = async function (grado, materia) {
+    try {
+        const response = await fetch(`${apiBaseUrl}/libros?grado=${grado}&materia=${materia}`);
+        if (!response.ok) {
+            throw new Error(`Error al obtener el libro: ${response.statusText}`);
+        }
+        const libro = await response.json();
+
+        if (libro.error) {
+            console.error('No se pudo cargar el libro:', libro.error);
+            alert('Error: Libro no encontrado');
+            return;
+        }
+
+        console.log('Libro cargado:', libro);
+
+        // Redirige a libro.html con el enlace del archivo como parámetro
+        window.location.href = `libro.html?archivo=${libro.archivo}`;
+    } catch (error) {
+        console.error('Error al cargar el libro:', error);
+    }
+};
+
+// Función para mostrar el libro y su índice
+window.mostrarLibro = async function () {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const archivo = urlParams.get('archivo');
+
+        if (!archivo) {
+            console.error('Archivo no especificado en la URL');
+            return;
+        }
+
+        const visor = ePub(archivo);
+
+        // Renderizar el libro en el visor
+        visor.renderTo("visor");
+
+        // Cargar y mostrar el índice
+        const indice = await visor.getToc();
+        const indiceElemento = document.getElementById('indice');
+        indice.forEach(capitulo => {
+            const li = document.createElement('li');
+            li.textContent = capitulo.label;
+            li.addEventListener('click', () => {
+                visor.goto(capitulo.href);
+            });
+            indiceElemento.appendChild(li);
+        });
+
+        console.log('Índice cargado correctamente:', indice);
+    } catch (error) {
+        console.error('Error al mostrar el libro:', error);
+    }
+};
+
 // Función para iniciar sesión
 window.login = function () {
     console.log('Iniciando sesión...');
@@ -114,7 +172,7 @@ window.verificarSesion = function () {
     }
 };
 
-// Asignar evento al botón de inicio de sesión
+// Asignar eventos en el DOM
 document.addEventListener('DOMContentLoaded', () => {
     const loginButton = document.getElementById('loginBtn');
     if (loginButton) {
@@ -127,10 +185,15 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Botón de inicio de sesión no encontrado.');
     }
 
-    // Verificar si hay una sesión activa o manejar autenticación
+    // Verificar sesión activa o manejar autenticación
     if (window.location.hash.includes('access_token')) {
         handleAuthentication();
     } else {
         verificarSesion();
+    }
+
+    // Mostrar el libro si estamos en libro.html
+    if (document.body.contains(document.getElementById('visor'))) {
+        mostrarLibro();
     }
 });
