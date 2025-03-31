@@ -78,22 +78,21 @@ def get_libro():
         print(f"Parámetros recibidos: grado={grado}, materia={materia}")  # Log de parámetros
 
         db = firestore.client()
-        libros_ref = db.collection('libros')
+        # Navegar hacia la subcolección `libros` dentro del documento `UGnlQLnPrig55tSmgeTu`
+        libros_ref = db.collection('libros').document('UGnlQLnPrig55tSmgeTu').collection('libros')
         query = libros_ref.where('grado', '==', grado).where('materia', '==', materia)
         resultados = query.stream()
-        print("Resultados obtenidos de Firestore:", resultados)  # Log de resultados
+        print(f"Resultados obtenidos: {resultados}")  # Log de resultados
 
         libros = [doc.to_dict() for doc in resultados]
         print(f"Libros encontrados: {libros}")  # Log de libros encontrados
 
         if libros:
-            return jsonify(libros[0])  # Devuelve el primer libro encontrado
+            return jsonify(libros[0])
         return jsonify({"error": "Libro no encontrado"}), 404
     except Exception as e:
-        print(f"Error al ejecutar el endpoint /api/libros: {str(e)}")
+        print(f"Error al ejecutar el endpoint /api/libros: {e}")
         return jsonify({"error": str(e)}), 500
-
-
 
 
 if __name__ == '__main__':
