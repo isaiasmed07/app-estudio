@@ -66,9 +66,14 @@ def get_clase(clase_id):
 
 
 # Inicializar Firebase
-cred = credentials.Certificate('firebase/app-escuela-c3504-firebase-adminsdk-fbsvc-27b9fd6d46.json')
-  # Ruta al archivo JSON de credenciales
-firebase_admin.initialize_app(cred)
+from firebase_admin import credentials, initialize_app
+
+# Obtener las credenciales desde la variable de entorno
+cred_json = os.environ.get("FIREBASE_CREDENTIALS")
+if not cred_json:
+    raise Exception("Las credenciales de Firebase no están configuradas como variable de entorno.")
+cred = credentials.Certificate(json.loads(cred_json))  # Convertir la cadena JSON en un diccionario
+initialize_app(cred)
 
 
 @app.route('/api/libros', methods=['GET'])
