@@ -70,21 +70,29 @@ cred = credentials.Certificate('firebase/credentials.json')  # Ruta al archivo J
 firebase_admin.initialize_app(cred)
 
 
-
 @app.route('/api/libros', methods=['GET'])
 def get_libro():
-    grado = request.args.get('grado')
-    materia = request.args.get('materia')
+    try:
+        grado = request.args.get('grado')
+        materia = request.args.get('materia')
+        print(f"Parámetros recibidos: grado={grado}, materia={materia}")  # Log de parámetros
 
-    db = firestore.client()
-    libros_ref = db.collection('libros')
-    query = libros_ref.where('grado', '==', grado).where('materia', '==', materia)
-    resultados = query.stream()
+        db = firestore.client()
+        libros_ref = db.collection('libros')
+        query = libros_ref.where('grado', '==', grado).where('materia', '==', materia)
+        resultados = query.stream()
+        print("Resultados obtenidos de Firestore:", resultados)  # Log de resultados
 
-    libros = [doc.to_dict() for doc in resultados]
-    if libros:
-        return jsonify(libros[0])  # Devuelve el primer libro encontrado
-    return jsonify({"error": "Libro no encontrado"}), 404
+        libros = [doc.to_dict() for doc in resultados]
+        print(f"Libros encontrados: {libros}")  # Log de libros encontrados
+
+        if libros:
+            return jsonify(libros[0])  # Devuelve el primer libro encontrado
+        return jsonify({"error": "Libro no encontrado"}), 404
+    except Exception as e:
+        print(f"Error al ejecutar el endpoint /api/libros: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
 
 
 
