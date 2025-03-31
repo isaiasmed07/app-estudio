@@ -1,15 +1,24 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS  # Importar Flask-CORS
-import firebase_admin
-from firebase_admin import credentials, firestore
 import os
 import json
+from firebase_admin import credentials, firestore, initialize_app, get_app
 
-# Cargar las credenciales desde la variable de entorno
-cred_json = os.environ.get("FIREBASE_CREDENTIALS")
-cred = credentials.Certificate(json.loads(cred_json))  # Convertir la cadena JSON en un diccionario
-firebase_admin.initialize_app(cred)
+# Inicializar Firebase (asegurarse de que solo se inicialice una vez)
+try:
+    # Comprobar si ya existe una aplicación Firebase inicializada
+    firebase_app = get_app()
+    print("Firebase ya está inicializado.")
+except ValueError:
+    # Inicializar Firebase si no está inicializado
+    print("Inicializando Firebase...")
+    cred_json = os.environ.get("FIREBASE_CREDENTIALS")
+    if not cred_json:
+        raise Exception("Las credenciales de Firebase no están configuradas como variable de entorno.")
+    cred = credentials.Certificate(json.loads(cred_json))  # Convertir la cadena JSON en un diccionario
+    initialize_app(cred)
 
+# Inicializar la aplicación Flask
 app = Flask(__name__)
 
 # Configuración de CORS: Permitir únicamente solicitudes desde Vercel
@@ -62,19 +71,6 @@ def get_clase(clase_id):
             return jsonify({"error": "Clase no encontrada"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
-
-
-# Inicializar Firebase
-from firebase_admin import credentials, initialize_app
-
-# Obtener las credenciales desde la variable de entorno
-cred_json = os.environ.get("FIREBASE_CREDENTIALS")
-if not cred_json:
-    raise Exception("Las credenciales de Firebase no están configuradas como variable de entorno.")
-cred = credentials.Certificate(json.loads(cred_json))  # Convertir la cadena JSON en un diccionario
-initialize_app(cred)
-
 
 @app.route('/api/libros', methods=['GET'])
 def get_libro():
@@ -110,7 +106,6 @@ def get_libro():
         # Manejar cualquier error inesperado y registrarlo
         print(f"Error al ejecutar el endpoint /api/libros: {e}")
         return jsonify({"error": str(e)}), 500
-
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))  # Usar el puerto proporcionado por Render
