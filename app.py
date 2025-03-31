@@ -66,37 +66,44 @@ def get_clase(clase_id):
 
 
 # Inicializar Firebase
-cred = credentials.Certificate('firebase/credentials.json')  # Ruta al archivo JSON de credenciales
+cred = credentials.Certificate('firebase/app-escuela-c3504-firebase-adminsdk-fbsvc-27b9fd6d46.json')
+  # Ruta al archivo JSON de credenciales
 firebase_admin.initialize_app(cred)
 
 
 @app.route('/api/libros', methods=['GET'])
 def get_libro():
     try:
-        grado = request.args.get('grado')  # Obtener el parámetro grado
-        materia = request.args.get('materia')  # Obtener el parámetro materia
-        print(f"Parámetros recibidos: grado={grado}, materia={materia}")  # Log de depuración
+        # Obtener los parámetros de la solicitud
+        grado = request.args.get('grado')
+        materia = request.args.get('materia')
+        print(f"Parámetros recibidos: grado={grado}, materia={materia}")  # Log para depuración
 
+        # Acceder directamente al documento con el ID especificado
         db = firestore.client()
-        # Acceder directamente al documento con ID UGnlQLnPrig55tSmgeTu
         libro_ref = db.collection('libros').document('UGnlQLnPrig55tSmgeTu')
         libro = libro_ref.get()
 
+        # Verificar si el documento existe
         if not libro.exists:
             print("Documento no encontrado en Firestore.")
             return jsonify({"error": "Libro no encontrado"}), 404
 
-        data = libro.to_dict()  # Convertir el documento en un diccionario
-        print(f"Datos obtenidos del documento: {data}")  # Log de los datos
+        # Convertir los datos del documento en un diccionario
+        data = libro.to_dict()
+        print(f"Datos obtenidos del documento: {data}")  # Log de los datos obtenidos
 
-        # Validar si los campos grado y materia coinciden con los parámetros
+        # Validar si los parámetros coinciden con los datos del documento
         if data.get('grado') == grado and data.get('materia') == materia:
+            print("Parámetros coinciden. Enviando datos del libro.")
             return jsonify(data), 200
 
+        # Si los parámetros no coinciden, devolver error
         print("El libro no coincide con los parámetros proporcionados.")
         return jsonify({"error": "Libro no encontrado"}), 404
     except Exception as e:
-        print(f"Error al ejecutar el endpoint /api/libros: {e}")  # Log de error
+        # Manejar cualquier error inesperado y registrarlo
+        print(f"Error al ejecutar el endpoint /api/libros: {e}")
         return jsonify({"error": str(e)}), 500
 
 
