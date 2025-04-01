@@ -7,6 +7,16 @@
     <link rel="stylesheet" href="style.css">
     <!-- Cargar epub.js desde un archivo local -->
     <script src="./js/epub.js"></script>
+    <!-- Script local de Auth0 -->
+    <script src="./js/auth0.min.js"></script>
+    <script>
+        // Verificar si auth0 está definido después de cargar el script
+        if (typeof auth0 === 'undefined') {
+            console.error('Auth0 no se cargó correctamente.');
+        } else {
+            console.log('Auth0 cargado exitosamente.');
+        }
+    </script>
     <script src="./app.js" defer></script>
 </head>
 <body>

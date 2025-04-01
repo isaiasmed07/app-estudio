@@ -6,7 +6,15 @@
     <title>Plataforma Educativa</title>
     <link rel="stylesheet" href="style.css">
     <!-- Script local de Auth0 -->
-    <script src="./js/auth0.min.js" defer></script>
+    <script src="./js/auth0.min.js"></script>
+    <script>
+        // Verificar si auth0 está definido después de cargar el script
+        if (typeof auth0 === 'undefined') {
+            console.error('Auth0 no se cargó correctamente.');
+        } else {
+            console.log('Auth0 cargado exitosamente.');
+        }
+    </script>
     <!-- Script personalizado -->
     <script src="app.js" defer></script>
 </head>
