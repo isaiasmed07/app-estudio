@@ -3,22 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Libro Digitalizado</title>
+    <title>Visor de Libro</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/epubjs/dist/epub.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/epub.js/0.3.88/epub.min.js"></script>
+    <script src="./app.js" defer></script>
 </head>
 <body>
     <header>
-        <input type="text" id="buscador" placeholder="Buscar en el libro...">
+        <h1>📖 Visor de Libro</h1>
     </header>
-    <aside>
-        <ul id="indice">
-            <!-- Aquí se cargará el índice dinámicamente -->
-        </ul>
-    </aside>
-    <main id="visor">
-        <!-- Aquí se renderizará el contenido del libro -->
+    <main>
+        <div id="visor"></div> <!-- Contenedor para el libro -->
+        <ul id="indice"></ul> <!-- Índice del libro -->
     </main>
-    <script src="app.js"></script>
+    <footer>
+        <p>© 2025 Plataforma Educativa</p>
+    </footer>
 </body>
 </html>
