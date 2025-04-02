@@ -10,45 +10,48 @@ const auth0Client = new auth0.WebAuth({
     scope: 'openid profile email'
 });
 
-// Función para cargar clases
-window.loadClases = async function () {
+// Función para mostrar el libro y su índice con un mensaje de carga
+window.mostrarLibro = async function () {
     try {
-        const response = await fetch(`${apiBaseUrl}/clases`);
-        if (!response.ok) {
-            throw new Error(`Error al obtener las clases: ${response.statusText}`);
+        const urlParams = new URLSearchParams(window.location.search);
+        const archivo = urlParams.get('archivo');
+
+        if (!archivo) {
+            console.error('Archivo no especificado en la URL');
+            return;
         }
-        const clases = await response.json();
 
-        const clasesDiv = document.getElementById('clases');
-        if (!clasesDiv) throw new Error("El contenedor con ID 'clases' no se encontró en el DOM.");
+        // Mostrar mensaje de carga
+        const visorElemento = document.getElementById("visor");
+        visorElemento.innerHTML = "<p>Cargando libro, por favor espere...</p>";
 
-        clasesDiv.innerHTML = '<h3>Clases:</h3>';
-        clases.forEach(clase => {
-            clasesDiv.innerHTML += `<p><strong>${clase.contenido.Matematicas}</strong>: ${clase.contenido.Descripcion}</p>`;
+        const visor = ePub(archivo);
+
+        // Renderizar el libro en el visor
+        await visor.renderTo("visor");
+
+        // Eliminar mensaje de carga cuando se haya cargado el libro
+        visorElemento.innerHTML = "";
+
+        // Cargar y mostrar el índice
+        const indice = await visor.navigation.contents; // Cargar el índice
+        const indiceElemento = document.getElementById('indice');
+        indice.forEach(capitulo => {
+            const li = document.createElement('li');
+            li.textContent = capitulo.label;
+            li.addEventListener('click', () => {
+                visor.goto(capitulo.href);
+            });
+            indiceElemento.appendChild(li);
         });
+
+        console.log('Índice cargado correctamente:', indice);
     } catch (error) {
-        console.error('Error al cargar las clases:', error);
-    }
-};
+        console.error('Error al mostrar el libro:', error);
 
-// Función para cargar lecciones
-window.loadLecciones = async function () {
-    try {
-        const response = await fetch(`${apiBaseUrl}/lecciones`);
-        if (!response.ok) {
-            throw new Error(`Error al obtener las lecciones: ${response.statusText}`);
-        }
-        const lecciones = await response.json();
-
-        const leccionesDiv = document.getElementById('lecciones');
-        if (!leccionesDiv) throw new Error("El contenedor con ID 'lecciones' no se encontró en el DOM.");
-
-        leccionesDiv.innerHTML = '<h3>Lecciones:</h3>';
-        lecciones.forEach(leccion => {
-            leccionesDiv.innerHTML += `<p><strong>${leccion.contenido.titulo}</strong></p>`;
-        });
-    } catch (error) {
-        console.error('Error al cargar las lecciones:', error);
+        // Mostrar mensaje de error si falla la carga
+        const visorElemento = document.getElementById("visor");
+        visorElemento.innerHTML = "<p>Error al cargar el libro. Por favor, inténtalo de nuevo más tarde.</p>";
     }
 };
 
@@ -73,40 +76,6 @@ window.cargarLibro = async function (grado, materia) {
         window.location.href = `libro.html?archivo=${libro.archivo}`;
     } catch (error) {
         console.error('Error al cargar el libro:', error);
-    }
-};
-
-// Función para mostrar el libro y su índice
-window.mostrarLibro = async function () {
-    try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const archivo = urlParams.get('archivo');
-
-        if (!archivo) {
-            console.error('Archivo no especificado en la URL');
-            return;
-        }
-
-        const visor = ePub(archivo);
-
-        // Renderizar el libro en el visor
-        visor.renderTo("visor");
-
-        // Cargar y mostrar el índice
-        const indice = await visor.getToc();
-        const indiceElemento = document.getElementById('indice');
-        indice.forEach(capitulo => {
-            const li = document.createElement('li');
-            li.textContent = capitulo.label;
-            li.addEventListener('click', () => {
-                visor.goto(capitulo.href);
-            });
-            indiceElemento.appendChild(li);
-        });
-
-        console.log('Índice cargado correctamente:', indice);
-    } catch (error) {
-        console.error('Error al mostrar el libro:', error);
     }
 };
 
