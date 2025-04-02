@@ -10,6 +10,48 @@ const auth0Client = new auth0.WebAuth({
     scope: 'openid profile email'
 });
 
+// Función para cargar clases
+window.loadClases = async function () {
+    try {
+        const response = await fetch(`${apiBaseUrl}/clases`);
+        if (!response.ok) {
+            throw new Error(`Error al obtener las clases: ${response.statusText}`);
+        }
+        const clases = await response.json();
+
+        const clasesDiv = document.getElementById('clases');
+        if (!clasesDiv) throw new Error("El contenedor con ID 'clases' no se encontró en el DOM.");
+
+        clasesDiv.innerHTML = '<h3>Clases:</h3>';
+        clases.forEach(clase => {
+            clasesDiv.innerHTML += `<p><strong>${clase.contenido.Matematicas}</strong>: ${clase.contenido.Descripcion}</p>`;
+        });
+    } catch (error) {
+        console.error('Error al cargar las clases:', error);
+    }
+};
+
+// Función para cargar lecciones
+window.loadLecciones = async function () {
+    try {
+        const response = await fetch(`${apiBaseUrl}/lecciones`);
+        if (!response.ok) {
+            throw new Error(`Error al obtener las lecciones: ${response.statusText}`);
+        }
+        const lecciones = await response.json();
+
+        const leccionesDiv = document.getElementById('lecciones');
+        if (!leccionesDiv) throw new Error("El contenedor con ID 'lecciones' no se encontró en el DOM.");
+
+        leccionesDiv.innerHTML = '<h3>Lecciones:</h3>';
+        lecciones.forEach(leccion => {
+            leccionesDiv.innerHTML += `<p><strong>${leccion.contenido.titulo}</strong></p>`;
+        });
+    } catch (error) {
+        console.error('Error al cargar las lecciones:', error);
+    }
+};
+
 // Función para mostrar el libro y su índice con un mensaje de carga
 window.mostrarLibro = async function () {
     try {
@@ -34,18 +76,22 @@ window.mostrarLibro = async function () {
         visorElemento.innerHTML = "";
 
         // Cargar y mostrar el índice
-        const indice = await visor.navigation.contents; // Cargar el índice
-        const indiceElemento = document.getElementById('indice');
-        indice.forEach(capitulo => {
-            const li = document.createElement('li');
-            li.textContent = capitulo.label;
-            li.addEventListener('click', () => {
-                visor.goto(capitulo.href);
+        if (visor.navigation && visor.navigation.contents) {
+            const indice = await visor.navigation.contents;
+            const indiceElemento = document.getElementById('indice');
+            indice.forEach(capitulo => {
+                const li = document.createElement('li');
+                li.textContent = capitulo.label;
+                li.addEventListener('click', () => {
+                    visor.goto(capitulo.href);
+                });
+                indiceElemento.appendChild(li);
             });
-            indiceElemento.appendChild(li);
-        });
-
-        console.log('Índice cargado correctamente:', indice);
+            console.log('Índice cargado correctamente:', indice);
+        } else {
+            console.error('El visor no tiene soporte para navigation.contents');
+            visorElemento.innerHTML = "<p>El índice no está disponible para este archivo.</p>";
+        }
     } catch (error) {
         console.error('Error al mostrar el libro:', error);
 
