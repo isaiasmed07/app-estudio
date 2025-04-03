@@ -52,7 +52,7 @@ window.loadLecciones = async function () {
     }
 };
 
-// Función para mostrar el libro y su índice con un mensaje de carga
+// Función para mostrar el libro y su índice con lógica dinámica
 window.mostrarLibro = async function () {
     try {
         const urlParams = new URLSearchParams(window.location.search);
@@ -71,11 +71,9 @@ window.mostrarLibro = async function () {
 
         // Renderizar el libro en el visor
         await visor.renderTo("visor");
+        visorElemento.innerHTML = ""; // Eliminar mensaje de carga
 
-        // Eliminar mensaje de carga cuando se haya cargado el libro
-        visorElemento.innerHTML = "";
-
-        // Cargar y mostrar el índice
+        // Intentar cargar el índice
         if (visor.navigation && visor.navigation.contents) {
             const indice = await visor.navigation.contents;
             const indiceElemento = document.getElementById('indice');
@@ -89,8 +87,9 @@ window.mostrarLibro = async function () {
             });
             console.log('Índice cargado correctamente:', indice);
         } else {
-            console.error('El visor no tiene soporte para navigation.contents');
-            visorElemento.innerHTML = "<p>El índice no está disponible para este archivo.</p>";
+            console.warn('El índice no está disponible para este archivo.');
+            const indiceElemento = document.getElementById('indice');
+            indiceElemento.innerHTML = "<p>El índice no está disponible para este archivo.</p>";
         }
     } catch (error) {
         console.error('Error al mostrar el libro:', error);
