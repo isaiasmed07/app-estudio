@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="./js/auth0.min.js" defer></script>
     <script src="app.js" defer></script>
+    <script src="./js/clases.js" defer></script> <!-- Nuevo script -->
 </head>
 <body>
     <header>
@@ -15,12 +16,13 @@
             <a href="index.html">Volver a la Página Principal</a>
         </nav>
     </header>
+
     <main>
-        <section id="clases-section">
-            <h2>Lista de Clases</h2>
-            <div id="clases"></div>
+        <section id="contenido">
+            <!-- Aquí se cargará dinámicamente la interfaz de grados, materias y videos -->
         </section>
     </main>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const accessToken = localStorage.getItem('accessToken');
@@ -29,7 +31,7 @@
                 window.location.href = 'index.html';
             } else {
                 console.log('Usuario autenticado, cargando contenido de clases...');
-                loadClases();
+                mostrarGrados(); // Llama a la función del nuevo flujo
             }
         });
     </script>
