@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Lección</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1 id="titulo">Cargando lección...</h1>
+    </header>
+    <main id="contenido"></main>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+
+        fetch(`https://app-estudio-backend.onrender.com/api/lecciones/${id}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("titulo").innerText = data.contenido.titulo;
+                document.getElementById("contenido").innerHTML = data.contenido.contenido_html;
+            })
+            .catch(err => {
+                document.getElementById("contenido").innerHTML = "<p>Error al cargar la lección.</p>";
+                console.error(err);
+            });
+    </script>
+</body>
+</html>

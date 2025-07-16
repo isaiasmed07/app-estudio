@@ -100,16 +100,13 @@ footer p {
 }
 
 
-/* Diseño para las clases en formato grid */
-
-#contenido {
+#grid-clases {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
     gap: 20px;
     padding: 20px;
 }
 
-/* Tarjetas para videos y clases */
 .clase-card {
     background: white;
     border-radius: 10px;
@@ -130,10 +127,31 @@ footer p {
     margin-bottom: 10px;
 }
 
-/* Ajuste a los videos */
-iframe {
+.clase-card iframe {
     border-radius: 8px;
     width: 100%;
     height: 202px;
     max-width: 360px;
+}
+
+
+
+#grid-lecciones {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.leccion-card {
+    background: white;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.leccion-card:hover {
+    transform: scale(1.03);
 }
