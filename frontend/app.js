@@ -63,19 +63,26 @@ window.mostrarLibro = async function () {
             return;
         }
 
+        console.log('URL del archivo EPUB:', archivo); // Log para verificar la URL
+
         // Mostrar mensaje de carga
         const visorElemento = document.getElementById("visor");
         visorElemento.innerHTML = "<p>Cargando libro, por favor espere...</p>";
 
         const visor = ePub(archivo);
 
+        console.log('Visor inicializado con archivo:', visor); // Log para verificar que el visor se inicializó
+
         // Renderizar el libro en el visor
         await visor.renderTo("visor");
+        console.log('Contenido del visor después de renderizar:', visorElemento.innerHTML);
+
         visorElemento.innerHTML = ""; // Eliminar mensaje de carga
 
         // Intentar cargar el índice
         if (visor.navigation && visor.navigation.contents) {
             const indice = await visor.navigation.contents;
+            console.log('Índice cargado:', indice);
             const indiceElemento = document.getElementById('indice');
             indice.forEach(capitulo => {
                 const li = document.createElement('li');
@@ -85,7 +92,6 @@ window.mostrarLibro = async function () {
                 });
                 indiceElemento.appendChild(li);
             });
-            console.log('Índice cargado correctamente:', indice);
         } else {
             console.warn('El índice no está disponible para este archivo.');
             const indiceElemento = document.getElementById('indice');
@@ -99,6 +105,7 @@ window.mostrarLibro = async function () {
         visorElemento.innerHTML = "<p>Error al cargar el libro. Por favor, inténtalo de nuevo más tarde.</p>";
     }
 };
+
 
 // Función para cargar y redirigir al libro
 window.cargarLibro = async function (grado, materia) {

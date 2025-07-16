@@ -34,7 +34,8 @@ function mostrarLeccionesLenguaje() {
     container.appendChild(gridContainer);
 
     // Llama al backend API para obtener las lecciones desde Firestore
-    fetch('https://app-estudio-backend.onrender.com/api/lecciones')
+    fetch('https://app-estudio-backend.onrender.com/api/lecciones?materia=lenguaje')
+
         .then(response => response.json())
         .then(data => {
             data.forEach(item => {

@@ -46,18 +46,29 @@ def get_clases():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/api/lecciones/<leccion_id>', methods=['GET'])
-def get_leccion(leccion_id):
+@app.route('/api/lecciones', methods=['GET'])
+def get_lecciones():
     try:
         db = firestore.client()
-        leccion_ref = db.collection('lecciones').document(leccion_id)
-        leccion = leccion_ref.get()
-        if leccion.exists:
-            return jsonify({"contenido": leccion.to_dict()}), 200
-        else:
-            return jsonify({"error": "Lección no encontrada"}), 404
+        materia = request.args.get('materia')  # lenguaje o matematicas
+
+        lecciones_ref = db.collection('lecciones')
+        lecciones = lecciones_ref.stream()
+
+        data = []
+        for leccion in lecciones:
+            contenido = leccion.to_dict()
+            if materia:
+                if contenido.get('materia', '').lower() == materia.lower():
+                    data.append({"id": leccion.id, "contenido": contenido})
+            else:
+                data.append({"id": leccion.id, "contenido": contenido})
+
+        return jsonify(data), 200
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 @app.route('/api/clases/<clase_id>', methods=['GET'])
 def get_clase(clase_id):
