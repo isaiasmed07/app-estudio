@@ -29,16 +29,24 @@ function mostrarLenguaje() {
 
     // Cargar JSON desde Dropbox
     fetch('https://dl.dropboxusercontent.com/scl/fi/fqnqwpyr0301spia0f9n4/CLASES.json?rlkey=m103vmfupjd7zsia4gx97t2oz&st=zwnqkqo9')
-
-
-
         .then(response => response.json())
         .then(data => {
             data.forEach(item => {
                 const div = document.createElement("div");
+                
+                let embedUrl = "";
+
+                // Verifica si es un curso (lista de reproducción) o un video normal
+                if (item.url.includes("list=")) {
+                    const listaID = item.url.split("list=")[1];
+                    embedUrl = `https://www.youtube.com/embed/videoseries?list=${listaID}`;
+                } else {
+                    embedUrl = item.url.replace("watch?v=", "embed/");
+                }
+
                 div.innerHTML = `
                     <h4>${item.titulo}</h4>
-                    <iframe width="300" height="200" src="${item.url.replace("watch?v=", "embed/")}" frameborder="0" allowfullscreen></iframe>
+                    <iframe width="300" height="200" src="${embedUrl}" frameborder="0" allowfullscreen></iframe>
                     <br><br>
                 `;
                 container.appendChild(div);
