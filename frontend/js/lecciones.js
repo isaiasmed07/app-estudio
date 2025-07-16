@@ -1,4 +1,4 @@
-// Mostrar selección de grados al cargar la página
+// Mostrar grados al cargar la página
 function mostrarGradosLecciones() {
     const grados = ["Primer Grado", "Segundo Grado", "Tercer Grado", "Cuarto Grado", "Quinto Grado", "Sexto Grado", "Séptimo Grado", "Octavo Grado", "Noveno Grado"];
     const container = document.getElementById("contenido-lecciones");
@@ -19,32 +19,34 @@ function seleccionarGradoLecciones(grado) {
 
     const container = document.getElementById("contenido-lecciones");
     container.innerHTML = "<h3>Seleccione la materia:</h3>";
-    container.innerHTML += `<button onclick="mostrarLecciones('Lenguaje')">Lenguaje</button> `;
-    container.innerHTML += `<button onclick="mostrarLecciones('Matemáticas')">Matemáticas</button>`;
+    container.innerHTML += `<button onclick="mostrarLeccionesLenguaje()">Lenguaje</button> `;
+    container.innerHTML += `<button onclick="alert('Matemáticas próximamente')">Matemáticas</button>`;
 }
 
-function mostrarLecciones(materia) {
+function mostrarLeccionesLenguaje() {
     const container = document.getElementById("contenido-lecciones");
-    container.innerHTML = `<h3>Lecciones de ${materia}</h3>`;
+    container.innerHTML = "<h3>Lecciones de Lenguaje</h3>";
 
+    // Crear contenedor tipo grid
     const gridContainer = document.createElement("div");
     gridContainer.id = "grid-lecciones";
 
     container.appendChild(gridContainer);
 
-    fetch('https://app-estudio-backend.onrender.com/api/lecciones') // Cambia al dominio correcto si es necesario
+    // Llama al backend API para obtener las lecciones desde Firestore
+    fetch('https://app-estudio-backend.onrender.com/api/lecciones')
         .then(response => response.json())
         .then(data => {
-            // Filtrar por materia si es necesario (opcional)
             data.forEach(item => {
                 const div = document.createElement("div");
-                div.classList.add("leccion-card");
+                div.classList.add("clase-card"); // Reutilizamos el diseño de las clases
 
                 div.innerHTML = `
                     <h4>${item.contenido.titulo}</h4>
                     <p>${item.contenido.descripcion}</p>
-                    <button onclick="verLeccion('${item.id}')">Ver lección</button>
+                    ${item.contenido.contenido_html}
                 `;
+
                 gridContainer.appendChild(div);
             });
         })
@@ -52,10 +54,6 @@ function mostrarLecciones(materia) {
             container.innerHTML += "<p>Error al cargar las lecciones.</p>";
             console.error(err);
         });
-}
-
-function verLeccion(id) {
-    window.location.href = `leccion.html?id=${id}`;
 }
 
 // Ejecutar al cargar la página
