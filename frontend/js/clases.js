@@ -28,7 +28,8 @@ function mostrarLenguaje() {
     container.innerHTML = "<h3>Clases de Lenguaje</h3>";
 
     // Cargar JSON desde Dropbox
-    fetch('https://dl.dropboxusercontent.com/scl/fi/0l8771dlvmlfstde4rtwn/CLASES.json?rlkey=dc0p3bzg4x5anncrv8yiusjvq&st=xohmcz3h')
+    https://dl.dropboxusercontent.com/scl/fi/fqnqwpyr0301spia0f9n4/CLASES.json?rlkey=m103vmfupjd7zsia4gx97t2oz&st=zwnqkqo9
+
 
 
         .then(response => response.json())
