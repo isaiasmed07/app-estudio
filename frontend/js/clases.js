@@ -20,21 +20,27 @@ function seleccionarGrado(grado) {
     const container = document.getElementById("contenido");
     container.innerHTML = "<h3>Seleccione la materia:</h3>";
     container.innerHTML += `<button onclick="mostrarLenguaje()">Lenguaje</button> `;
-    container.innerHTML += `<button onclick="alert('Matemáticas próximamente')">Matemáticas</button>`;
+    container.innerHTML += `<button onclick="mostrarMatematicas()">Matemáticas</button>`;
 }
 
 function mostrarLenguaje() {
-    const container = document.getElementById("contenido");
-    container.innerHTML = "<h3>Clases de Lenguaje</h3>";
+    cargarClases('Lenguaje', 'https://dl.dropboxusercontent.com/scl/fi/fqnqwpyr0301spia0f9n4/CLASES.json?rlkey=m103vmfupjd7zsia4gx97t2oz&st=zwnqkqo9');
+}
 
-    // Crear un contenedor exclusivo para el grid
+function mostrarMatematicas() {
+    cargarClases('Matemáticas', 'https://dl.dropboxusercontent.com/scl/fi/p2rf3hamf2x2sra1gq3xv/Matematicas.json?rlkey=3z96dye0mmlojetm4wdbzp5tj&st=myvd4y7m');
+}
+
+function cargarClases(materia, jsonUrl) {
+    const container = document.getElementById("contenido");
+    container.innerHTML = `<h3>Clases de ${materia}</h3>`;
+
     const gridContainer = document.createElement("div");
-    gridContainer.id = "grid-clases"; // Se usará el CSS con este id
+    gridContainer.id = "grid-clases";
 
     container.appendChild(gridContainer);
 
-    // Cargar JSON desde Dropbox
-    fetch('https://dl.dropboxusercontent.com/scl/fi/fqnqwpyr0301spia0f9n4/CLASES.json?rlkey=m103vmfupjd7zsia4gx97t2oz&st=zwnqkqo9')
+    fetch(jsonUrl)
         .then(response => response.json())
         .then(data => {
             data.forEach(item => {
@@ -43,7 +49,6 @@ function mostrarLenguaje() {
 
                 let embedUrl = "";
 
-                // Verifica si es un curso (playlist) o un video normal
                 if (item.url.includes("list=")) {
                     const listaID = item.url.split("list=")[1];
                     embedUrl = `https://www.youtube.com/embed/videoseries?list=${listaID}`;
@@ -59,7 +64,7 @@ function mostrarLenguaje() {
             });
         })
         .catch(err => {
-            container.innerHTML += "<p>Error al cargar las clases.</p>";
+            container.innerHTML += `<p>Error al cargar las clases de ${materia}.</p>`;
             console.error(err);
         });
 }
