@@ -31,9 +31,18 @@ function mostrarLenguaje() {
     fetch('https://dl.dropboxusercontent.com/scl/fi/fqnqwpyr0301spia0f9n4/CLASES.json?rlkey=m103vmfupjd7zsia4gx97t2oz&st=zwnqkqo9')
         .then(response => response.json())
         .then(data => {
+
+            // Crear contenedor tipo grid
+            const gridContainer = document.createElement("div");
+            gridContainer.style.display = "grid";
+            gridContainer.style.gridTemplateColumns = "repeat(auto-fit, minmax(360px, 1fr))";
+            gridContainer.style.gap = "20px";
+            gridContainer.style.padding = "20px";
+
             data.forEach(item => {
                 const div = document.createElement("div");
-                
+                div.classList.add("clase-card");
+
                 let embedUrl = "";
 
                 // Verifica si es un curso (lista de reproducción) o un video normal
@@ -46,11 +55,12 @@ function mostrarLenguaje() {
 
                 div.innerHTML = `
                     <h4>${item.titulo}</h4>
-                    <iframe width="300" height="200" src="${embedUrl}" frameborder="0" allowfullscreen></iframe>
-                    <br><br>
+                    <iframe width="360" height="202" src="${embedUrl}" frameborder="0" allowfullscreen></iframe>
                 `;
-                container.appendChild(div);
+                gridContainer.appendChild(div);
             });
+
+            container.appendChild(gridContainer);
         })
         .catch(err => {
             container.innerHTML += "<p>Error al cargar las clases.</p>";
