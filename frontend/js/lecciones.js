@@ -42,7 +42,6 @@ function mostrarLeccionesLenguaje() {
             data.forEach(item => {
                 const leccion = item.contenido;
 
-                // Extraer la URL del EPUB desde el contenido_html
                 const match = leccion.contenido_html.match(/href='(.*?)'/);
                 const epubUrl = match ? match[1] : '#';
 
@@ -53,7 +52,7 @@ function mostrarLeccionesLenguaje() {
                     <img src="https://cdn-icons-png.flaticon.com/512/2972/2972341.png" alt="EPUB" width="100" height="100" style="object-fit: contain;">
                     <h4>${leccion.titulo}</h4>
                     <p>${leccion.descripcion}</p>
-                    <button onclick="abrirVisorEPUB('${encodeURIComponent(epubUrl)}')">Abrir</button>
+                    <button onclick="descargarYabrirEPUB('${encodeURIComponent(epubUrl)}')">Abrir</button>
                     <a href="${epubUrl}" target="_blank" download><button>Descargar</button></a>
                 `;
 
@@ -68,9 +67,21 @@ function mostrarLeccionesLenguaje() {
         });
 }
 
-// Función para abrir el visor EPUB
-function abrirVisorEPUB(url) {
-    window.location.href = `libro.html?epub=${url}`;
+// Nuevo método para descargar y abrir el EPUB evitando CORS
+async function descargarYabrirEPUB(epubUrl) {
+    const decodedUrl = decodeURIComponent(epubUrl);
+
+    try {
+        const response = await fetch(decodedUrl);
+        const blob = await response.blob();
+
+        const blobUrl = URL.createObjectURL(blob);
+
+        window.location.href = `libro.html?blob=${encodeURIComponent(blobUrl)}`;
+    } catch (err) {
+        console.error("Error al descargar el EPUB:", err);
+        alert("Hubo un problema al abrir el archivo.");
+    }
 }
 
 // Ejecutar al cargar la página
