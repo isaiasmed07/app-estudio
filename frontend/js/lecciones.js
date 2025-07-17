@@ -1,3 +1,36 @@
+// Mostrar grados al cargar la página
+function mostrarGradosLecciones() {
+    const container = document.getElementById("contenido-lecciones");
+    container.innerHTML = "<h3>Seleccione su grado:</h3>";
+
+    const grados = ["Primer Grado", "Segundo Grado", "Tercer Grado", "Cuarto Grado", "Quinto Grado", "Sexto Grado", "Séptimo Grado", "Octavo Grado", "Noveno Grado"];
+
+    grados.forEach(grado => {
+        const div = document.createElement("div");
+        div.innerHTML = `
+            <button onclick="seleccionarGradoLecciones('${grado}')">${grado}</button><br>
+            ${grado === "Primer Grado" ? "" : "<small>Próximamente</small>"}
+        `;
+        container.appendChild(div);
+    });
+}
+
+function seleccionarGradoLecciones(grado) {
+    if (grado !== "Primer Grado") {
+        alert("Contenido disponible próximamente");
+        return;
+    }
+
+    const container = document.getElementById("contenido-lecciones");
+    container.innerHTML = "<h3>Seleccione la materia:</h3>";
+
+    container.innerHTML += `
+        <button onclick="mostrarLeccionesLenguaje()">Lenguaje</button> 
+        <button onclick="alert('Matemáticas próximamente')">Matemáticas</button>
+    `;
+}
+
+// Mostrar las lecciones de lenguaje (flujo mejorado)
 function mostrarLeccionesLenguaje() {
     const container = document.getElementById("contenido-lecciones");
     container.innerHTML = "<h3>Lecciones de Lenguaje</h3>";
@@ -8,18 +41,18 @@ function mostrarLeccionesLenguaje() {
     gridContainer.style.gap = "20px";
     gridContainer.style.padding = "20px";
 
-    // Cargar lecciones desde tu API en Render
+    // Llamada a la API del backend
     fetch("https://app-estudio-backend.onrender.com/api/lecciones")
         .then(response => response.json())
         .then(data => {
             data.forEach(item => {
                 const leccion = item.contenido;
 
-                // Extraer la URL del EPUB correctamente
+                // Extraer URL del EPUB del contenido_html
                 const match = leccion.contenido_html.match(/href=['"]([^'"]+)['"]/);
                 let epubUrl = match ? match[1] : '#';
 
-                // Asegurar que sea enlace directo (Dropbox raw o dl=1)
+                // Asegurar que la URL tenga ?raw=1 o ?dl=1
                 if (!epubUrl.includes("?raw=1") && !epubUrl.includes("?dl=1")) {
                     epubUrl += (epubUrl.includes("?") ? "&" : "?") + "raw=1";
                 }
@@ -27,12 +60,12 @@ function mostrarLeccionesLenguaje() {
                 const card = document.createElement("div");
                 card.classList.add("clase-card");
 
-                // Crear botón de abrir visor sin problemas de comillas
+                // Botón Abrir EPUB
                 const botonAbrir = document.createElement("button");
                 botonAbrir.textContent = "Abrir";
                 botonAbrir.onclick = () => abrirVisorEPUB(epubUrl);
 
-                // Crear botón de descarga
+                // Botón Descargar EPUB
                 const linkDescarga = document.createElement("a");
                 linkDescarga.href = epubUrl;
                 linkDescarga.target = "_blank";
@@ -41,7 +74,6 @@ function mostrarLeccionesLenguaje() {
                 botonDescarga.textContent = "Descargar";
                 linkDescarga.appendChild(botonDescarga);
 
-                // Construir la tarjeta
                 card.innerHTML = `
                     <img src="https://cdn-icons-png.flaticon.com/512/2972/2972341.png" alt="EPUB" width="100" height="100" style="object-fit: contain;">
                     <h4>${leccion.titulo}</h4>
@@ -62,8 +94,11 @@ function mostrarLeccionesLenguaje() {
         });
 }
 
-// Función para abrir el visor EPUB
+// Abrir visor de EPUB
 function abrirVisorEPUB(url) {
     const finalUrl = encodeURIComponent(url);
     window.location.href = `libro.html?epub=${finalUrl}`;
 }
+
+// Ejecutar al cargar la página
+window.onload = mostrarGradosLecciones;
