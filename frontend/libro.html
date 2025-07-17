@@ -6,21 +6,35 @@
     <title>Visor de Libro</title>
     <link rel="stylesheet" href="style.css">
     <script src="./js/epub.js"></script>
-    <script>
-        window.onload = function() {
-            const params = new URLSearchParams(window.location.search);
-            const epubUrl = params.get('epub');
+    <script src="./js/auth0.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>📖 Visor de Libro</h1>
+    </header>
+    <main>
+        <div id="visor" style="height: 80vh; border: 1px solid #ccc; margin: 20px;"></div>
+        <ul id="indice"></ul>
+    </main>
+    <footer>
+        <p>© 2025 Plataforma Educativa</p>
+    </footer>
 
-            if (!epubUrl) {
-                document.body.innerHTML = "<h2>Error: No se proporcionó un archivo EPUB.</h2>";
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const epubBlobUrl = localStorage.getItem('epubBlob');
+
+            if (!epubBlobUrl) {
+                alert("No se encontró ningún archivo EPUB para abrir.");
+                window.location.href = "lecciones.html";
                 return;
             }
 
-            // Crear el visor EPUB
-            const book = ePub(decodeURIComponent(epubUrl));
+            // Inicializar EPUB.js con el blob
+            const book = ePub(epubBlobUrl);
             const rendition = book.renderTo("visor", {
                 width: "100%",
-                height: "90vh"
+                height: "100%"
             });
 
             rendition.display();
@@ -28,32 +42,22 @@
             // Generar índice dinámico
             book.loaded.navigation.then(function(toc) {
                 const indice = document.getElementById("indice");
-                toc.forEach(function(capitulo) {
+                toc.forEach(function(chapter) {
                     const li = document.createElement("li");
-                    const link = document.createElement("a");
-                    link.textContent = capitulo.label;
-                    link.href = "#";
-                    link.onclick = function() {
-                        rendition.display(capitulo.href);
-                        return false;
+                    li.innerHTML = `<a href='#'>${chapter.label}</a>`;
+                    li.onclick = function() {
+                        rendition.display(chapter.href);
                     };
-                    li.appendChild(link);
                     indice.appendChild(li);
                 });
             });
-        };
+
+            // Limpiar el blob al salir
+            window.onbeforeunload = () => {
+                URL.revokeObjectURL(epubBlobUrl);
+                localStorage.removeItem('epubBlob');
+            };
+        });
     </script>
-</head>
-<body>
-    <header>
-        <h1>📖 Visor de Libro</h1>
-    </header>
-    <main>
-        <div id="visor"></div>
-        <ul id="indice"></ul>
-    </main>
-    <footer>
-        <p>© 2025 Plataforma Educativa</p>
-    </footer>
 </body>
 </html>
