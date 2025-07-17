@@ -42,8 +42,15 @@ function mostrarLeccionesLenguaje() {
             data.forEach(item => {
                 const leccion = item.contenido;
 
-                const match = leccion.contenido_html.match(/href='(.*?)'/);
-                const epubUrl = match ? match[1] : '#';
+                let epubUrl = '#';
+                if (leccion.contenido_html.startsWith('http')) {
+                    // Si ya es un enlace directo (Google Drive, etc.)
+                    epubUrl = leccion.contenido_html.trim();
+                } else {
+                    // Si es un <a href=...>
+                    const match = leccion.contenido_html.match(/href=['"](.*?)['"]/);
+                    epubUrl = match ? match[1] : '#';
+                }
 
                 const card = document.createElement("div");
                 card.classList.add("clase-card");
@@ -67,10 +74,8 @@ function mostrarLeccionesLenguaje() {
         });
 }
 
-// Función para abrir directamente con el visor pasando la URL
-function abrirVisorEPUB(epubUrl) {
-    window.location.href = `libro.html?epub=${epubUrl}`;
+function abrirVisorEPUB(url) {
+    window.location.href = `libro.html?epub=${url}`;
 }
 
-// Ejecutar al cargar la página
 window.onload = mostrarGradosLecciones;
