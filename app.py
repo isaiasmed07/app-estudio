@@ -24,16 +24,6 @@ app = Flask(__name__)
 # Configuración de CORS: Permitir únicamente solicitudes desde Vercel
 CORS(app, resources={r"/api/*": {"origins": "https://app-estudio.vercel.app"}})
 
-@app.route('/api/lecciones', methods=['GET'])
-def get_lecciones():
-    try:
-        db = firestore.client()
-        lecciones_ref = db.collection('lecciones')  # Consulta la colección 'lecciones'
-        lecciones = lecciones_ref.stream()
-        data = [{"id": leccion.id, "contenido": leccion.to_dict()} for leccion in lecciones]
-        return jsonify(data), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/clases', methods=['GET'])
 def get_clases():
@@ -52,7 +42,7 @@ def get_lecciones():
         db = firestore.client()
         materia = request.args.get('materia')  # lenguaje o matematicas
 
-        lecciones_ref = db.collection('Lecciones')  # <-- corregido aquí
+        lecciones_ref = db.collection('lecciones')  # 🔧 Debe ser en minúsculas si así está en Firestore
         lecciones = lecciones_ref.stream()
 
         data = []
@@ -68,6 +58,7 @@ def get_lecciones():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 
 @app.route('/api/clases/<clase_id>', methods=['GET'])
