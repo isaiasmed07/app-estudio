@@ -6,60 +6,54 @@
     <title>Visor de Libro</title>
     <link rel="stylesheet" href="style.css">
     <script src="./js/epub.js"></script>
-    <script src="./js/auth0.min.js"></script>
-    <script src="./app.js" defer></script>
-</head>
-<body>
-    <header>
-        <h1>📖 Visor de Libro</h1>
-        <nav>
-            <a href="lecciones.html">Volver a Lecciones</a>
-        </nav>
-    </header>
-    <main>
-        <div id="visor" style="width: 100%; height: 600px; border: 1px solid #ccc; margin-bottom: 20px;"></div>
-        <h3>Índice</h3>
-        <ul id="indice" style="text-align: left;"></ul>
-    </main>
-    <footer>
-        <p>© 2025 Plataforma Educativa</p>
-    </footer>
-
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        window.onload = function() {
             const params = new URLSearchParams(window.location.search);
-            const epubUrl = decodeURIComponent(params.get('epub'));
+            const epubUrl = params.get('epub');
 
             if (!epubUrl) {
-                alert("No se proporcionó un archivo EPUB.");
+                document.body.innerHTML = "<h2>Error: No se proporcionó un archivo EPUB.</h2>";
                 return;
             }
 
-            const book = ePub(epubUrl);
+            // Crear el visor EPUB
+            const book = ePub(decodeURIComponent(epubUrl));
             const rendition = book.renderTo("visor", {
                 width: "100%",
-                height: 600
+                height: "90vh"
             });
 
             rendition.display();
 
-            // Crear índice
+            // Generar índice dinámico
             book.loaded.navigation.then(function(toc) {
                 const indice = document.getElementById("indice");
-                toc.forEach(item => {
+                toc.forEach(function(capitulo) {
                     const li = document.createElement("li");
                     const link = document.createElement("a");
-                    link.textContent = item.label;
+                    link.textContent = capitulo.label;
                     link.href = "#";
-                    link.onclick = function(e) {
-                        e.preventDefault();
-                        rendition.display(item.href);
+                    link.onclick = function() {
+                        rendition.display(capitulo.href);
+                        return false;
                     };
                     li.appendChild(link);
                     indice.appendChild(li);
                 });
             });
-        });
+        };
     </script>
+</head>
+<body>
+    <header>
+        <h1>📖 Visor de Libro</h1>
+    </header>
+    <main>
+        <div id="visor"></div>
+        <ul id="indice"></ul>
+    </main>
+    <footer>
+        <p>© 2025 Plataforma Educativa</p>
+    </footer>
 </body>
 </html>
