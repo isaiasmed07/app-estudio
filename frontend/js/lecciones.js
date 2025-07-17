@@ -67,17 +67,22 @@ function mostrarLeccionesLenguaje() {
         });
 }
 
-// Nuevo método para descargar y abrir el EPUB evitando CORS
+// Función para descargar el EPUB y pasarlo con sessionStorage
 async function descargarYabrirEPUB(epubUrl) {
     const decodedUrl = decodeURIComponent(epubUrl);
 
     try {
         const response = await fetch(decodedUrl);
+        if (!response.ok) throw new Error("No se pudo descargar el EPUB");
+
         const blob = await response.blob();
 
-        const blobUrl = URL.createObjectURL(blob);
-
-        window.location.href = `libro.html?blob=${encodeURIComponent(blobUrl)}`;
+        const reader = new FileReader();
+        reader.onload = function() {
+            sessionStorage.setItem("epubData", reader.result);
+            window.location.href = "libro.html";
+        };
+        reader.readAsDataURL(blob);
     } catch (err) {
         console.error("Error al descargar el EPUB:", err);
         alert("Hubo un problema al abrir el archivo.");

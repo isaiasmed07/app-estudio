@@ -22,16 +22,16 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const epubBlobUrl = localStorage.getItem('epubBlob');
+            const epubDataUrl = sessionStorage.getItem('epubData');
 
-            if (!epubBlobUrl) {
+            if (!epubDataUrl) {
                 alert("No se encontró ningún archivo EPUB para abrir.");
                 window.location.href = "lecciones.html";
                 return;
             }
 
-            // Inicializar EPUB.js con el blob
-            const book = ePub(epubBlobUrl);
+            // Inicializar EPUB.js con el data URL base64
+            const book = ePub(epubDataUrl);
             const rendition = book.renderTo("visor", {
                 width: "100%",
                 height: "100%"
@@ -52,10 +52,9 @@
                 });
             });
 
-            // Limpiar el blob al salir
+            // Limpiar sessionStorage al salir
             window.onbeforeunload = () => {
-                URL.revokeObjectURL(epubBlobUrl);
-                localStorage.removeItem('epubBlob');
+                sessionStorage.removeItem('epubData');
             };
         });
     </script>
