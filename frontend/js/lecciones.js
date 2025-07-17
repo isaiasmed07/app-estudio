@@ -52,7 +52,7 @@ function mostrarLeccionesLenguaje() {
                     <img src="https://cdn-icons-png.flaticon.com/512/2972/2972341.png" alt="EPUB" width="100" height="100" style="object-fit: contain;">
                     <h4>${leccion.titulo}</h4>
                     <p>${leccion.descripcion}</p>
-                    <button onclick="descargarYabrirEPUB('${encodeURIComponent(epubUrl)}')">Abrir</button>
+                    <button onclick="abrirVisorEPUB('${encodeURIComponent(epubUrl)}')">Abrir</button>
                     <a href="${epubUrl}" target="_blank" download><button>Descargar</button></a>
                 `;
 
@@ -67,26 +67,9 @@ function mostrarLeccionesLenguaje() {
         });
 }
 
-// Función para descargar el EPUB y pasarlo con sessionStorage
-async function descargarYabrirEPUB(epubUrl) {
-    const decodedUrl = decodeURIComponent(epubUrl);
-
-    try {
-        const response = await fetch(decodedUrl);
-        if (!response.ok) throw new Error("No se pudo descargar el EPUB");
-
-        const blob = await response.blob();
-
-        const reader = new FileReader();
-        reader.onload = function() {
-            sessionStorage.setItem("epubData", reader.result);
-            window.location.href = "libro.html";
-        };
-        reader.readAsDataURL(blob);
-    } catch (err) {
-        console.error("Error al descargar el EPUB:", err);
-        alert("Hubo un problema al abrir el archivo.");
-    }
+// Función para abrir directamente con el visor pasando la URL
+function abrirVisorEPUB(epubUrl) {
+    window.location.href = `libro.html?epub=${epubUrl}`;
 }
 
 // Ejecutar al cargar la página
