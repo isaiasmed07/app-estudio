@@ -52,7 +52,7 @@ def get_lecciones():
         db = firestore.client()
         materia = request.args.get('materia')  # lenguaje o matematicas
 
-        lecciones_ref = db.collection('lecciones')
+        lecciones_ref = db.collection('Lecciones')  # <-- corregido aquí
         lecciones = lecciones_ref.stream()
 
         data = []
