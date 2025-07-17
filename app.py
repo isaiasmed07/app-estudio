@@ -51,9 +51,10 @@ def get_clase(clase_id):
 def get_lecciones():
     try:
         db = firestore.client()
-        materia = request.args.get('materia')
+        materia = request.args.get('materia')  # lenguaje o matematicas
 
-        lecciones_ref = db.collection('lecciones')  # Usa 'lecciones' en minúsculas según tu Firestore
+        # Corregido: nombre de la colección con mayúscula
+        lecciones_ref = db.collection('Lecciones')
         lecciones = lecciones_ref.stream()
 
         data = []
@@ -66,8 +67,10 @@ def get_lecciones():
                 data.append({"id": leccion.id, "contenido": contenido})
 
         return jsonify(data), 200
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 # ---------- LIBROS ----------
 @app.route('/api/libros', methods=['GET'])
