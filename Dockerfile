@@ -1,10 +1,10 @@
-# Usa una imagen base de Python
-FROM python:3.9-slim
+# Usa una imagen base de Python 3.12 (requerido por vercel-blob)
+FROM python:3.12-slim
 
 # Establece el directorio de trabajo en el contenedor
 WORKDIR /app
 
-# Copia los archivos necesarios
+# Copia los archivos necesarios al contenedor
 COPY . .
 
 # Instala las dependencias desde requirements.txt
