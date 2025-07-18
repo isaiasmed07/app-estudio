@@ -6,7 +6,7 @@
     <title>Visor de Libro</title>
     <link rel="stylesheet" href="style.css">
 
-    <!-- ✅ Solución: Cargar JSZip antes de epub.js -->
+    <!-- Librerías necesarias -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="./js/epub.js"></script>
 </head>
@@ -16,7 +16,7 @@
     </header>
 
     <main>
-        <div id="visor" style="height: 80vh; border: 1px solid #ccc; margin: 20px;"></div>
+        <div id="visor" style="height: 80vh; border: 1px solid #ccc; margin: 20px; cursor: pointer;"></div>
         <ul id="indice"></ul>
     </main>
 
@@ -67,6 +67,20 @@
                         };
                         indice.appendChild(li);
                     });
+                });
+
+                // 🚀 Navegación con teclado
+                document.addEventListener("keydown", function(event) {
+                    if (event.key === "ArrowRight") {
+                        rendition.next();
+                    } else if (event.key === "ArrowLeft") {
+                        rendition.prev();
+                    }
+                });
+
+                // 🚀 Navegación por clic en visor (avanzar página)
+                document.getElementById("visor").addEventListener("click", function() {
+                    rendition.next();
                 });
             }
         });
