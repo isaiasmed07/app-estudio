@@ -3,6 +3,9 @@ from flask_cors import CORS
 import os
 import json
 import requests
+import io
+from vercel_blob import put  # ✅ Import correcto
+
 from firebase_admin import credentials, firestore, initialize_app, get_app
 
 # Inicializar Firebase
@@ -18,8 +21,6 @@ except ValueError:
     initialize_app(cred)
 
 app = Flask(__name__)
-
-# CORS global
 CORS(app)
 
 # ---------- CLASES ----------
@@ -84,6 +85,7 @@ def get_libro():
         libro = libro_ref.get()
 
         if not libro.exists:
+            print("Documento no encontrado en Firestore.")
             return jsonify({"error": "Libro no encontrado"}), 404
 
         data = libro.to_dict()
@@ -100,33 +102,30 @@ def get_libro():
         print(f"Error al ejecutar el endpoint /api/libros: {e}")
         return jsonify({"error": str(e)}), 500
 
-# ---------- PROXY EPUB ----------
-@app.route('/proxy-epub', methods=['GET'])
-def proxy_epub():
-    url = request.args.get('url')
-    if not url:
-        return Response(json.dumps({"error": "Falta el parámetro 'url'"}), status=200, mimetype='application/json',
-                        headers={"Access-Control-Allow-Origin": "*"})
+# ---------- SUBIR EPUB A VERCEL BLOB ----------
+@app.route('/api/subir-epub', methods=['POST'])
+def subir_epub():
+    file = request.files.get('file')
+
+    if not file:
+        return jsonify({"error": "Archivo no proporcionado"}), 400
 
     try:
-        r = requests.get(url, stream=True)
+        filename = file.filename
+        file_content = io.BytesIO(file.read())
 
-        if r.status_code != 200:
-            return Response(json.dumps({"error": "No se pudo obtener el archivo", "status_code": r.status_code}),
-                            status=200, mimetype='application/json',
-                            headers={"Access-Control-Allow-Origin": "*"})
+        # Usar put directamente (token ya lo detecta desde el entorno)
+        result = put(filename, file_content, content_type="application/epub+zip")
 
-        return Response(r.content, headers={
-            "Access-Control-Allow-Origin": "*",
-            "Content-Type": "application/epub+zip"
-        })
+        return jsonify({
+            "message": "Archivo EPUB subido exitosamente.",
+            "public_url": result["url"]
+        }), 200
 
     except Exception as e:
-        return Response(json.dumps({"error": str(e)}), status=200, mimetype='application/json',
-                        headers={"Access-Control-Allow-Origin": "*"})
+        return jsonify({"error": str(e)}), 500
 
 # ---------- MAIN ----------
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
-
