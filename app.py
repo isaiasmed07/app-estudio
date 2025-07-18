@@ -106,23 +106,26 @@ def get_libro():
 def proxy_epub():
     url = request.args.get('url')
     if not url:
-        return jsonify({"error": "Falta el parámetro 'url'"}), 400
-
+        return Response(json.dumps({"error": "Falta el parámetro 'url'"}), status=200, mimetype='application/json',
+                        headers={"Access-Control-Allow-Origin": "*"})
     try:
         r = requests.get(url, stream=True)
 
         if r.status_code != 200:
-            return jsonify({"error": "No se pudo obtener el archivo", "status_code": r.status_code}), 404
+            # Siempre responde 200 para evitar error CORS en navegador
+            return Response(json.dumps({"error": "No se pudo obtener el archivo", "status_code": r.status_code}),
+                            status=200, mimetype='application/json',
+                            headers={"Access-Control-Allow-Origin": "*"})
 
-        headers = {
+        return Response(r.content, headers={
             "Access-Control-Allow-Origin": "*",
             "Content-Type": "application/epub+zip"
-        }
-
-        return Response(r.content, headers=headers)
+        })
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return Response(json.dumps({"error": str(e)}), status=200, mimetype='application/json',
+                        headers={"Access-Control-Allow-Origin": "*"})
+
 
 # ---------- MAIN ----------
 if __name__ == '__main__':
