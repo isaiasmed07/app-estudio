@@ -1,7 +1,8 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
 from flask_cors import CORS
 import os
 import json
+import requests
 from firebase_admin import credentials, firestore, initialize_app, get_app
 
 # Inicializar Firebase
@@ -18,8 +19,8 @@ except ValueError:
 
 app = Flask(__name__)
 
-# CORS
-CORS(app, resources={r"/api/*": {"origins": "https://app-estudio.vercel.app"}})
+# CORS general para todas las rutas (incluye proxy)
+CORS(app)
 
 # ---------- CLASES ----------
 @app.route('/api/clases', methods=['GET'])
@@ -51,9 +52,8 @@ def get_clase(clase_id):
 def get_lecciones():
     try:
         db = firestore.client()
-        materia = request.args.get('materia')  # lenguaje o matematicas
+        materia = request.args.get('materia')
 
-        # Corregido: nombre de la colección con mayúscula
         lecciones_ref = db.collection('Lecciones')
         lecciones = lecciones_ref.stream()
 
@@ -70,7 +70,6 @@ def get_lecciones():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 # ---------- LIBROS ----------
 @app.route('/api/libros', methods=['GET'])
@@ -100,6 +99,29 @@ def get_libro():
 
     except Exception as e:
         print(f"Error al ejecutar el endpoint /api/libros: {e}")
+        return jsonify({"error": str(e)}), 500
+
+# ---------- PROXY EPUB ----------
+@app.route('/proxy-epub', methods=['GET'])
+def proxy_epub():
+    url = request.args.get('url')
+    if not url:
+        return jsonify({"error": "Falta el parámetro 'url'"}), 400
+
+    try:
+        r = requests.get(url, stream=True)
+
+        if r.status_code != 200:
+            return jsonify({"error": "No se pudo obtener el archivo", "status_code": r.status_code}), 404
+
+        headers = {
+            "Access-Control-Allow-Origin": "*",
+            "Content-Type": "application/epub+zip"
+        }
+
+        return Response(r.content, headers=headers)
+
+    except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 # ---------- MAIN ----------
