@@ -19,7 +19,7 @@ except ValueError:
 
 app = Flask(__name__)
 
-# CORS general para todas las rutas (incluye proxy)
+# CORS global
 CORS(app)
 
 # ---------- CLASES ----------
@@ -84,7 +84,6 @@ def get_libro():
         libro = libro_ref.get()
 
         if not libro.exists:
-            print("Documento no encontrado en Firestore.")
             return jsonify({"error": "Libro no encontrado"}), 404
 
         data = libro.to_dict()
@@ -108,11 +107,11 @@ def proxy_epub():
     if not url:
         return Response(json.dumps({"error": "Falta el parámetro 'url'"}), status=200, mimetype='application/json',
                         headers={"Access-Control-Allow-Origin": "*"})
+
     try:
         r = requests.get(url, stream=True)
 
         if r.status_code != 200:
-            # Siempre responde 200 para evitar error CORS en navegador
             return Response(json.dumps({"error": "No se pudo obtener el archivo", "status_code": r.status_code}),
                             status=200, mimetype='application/json',
                             headers={"Access-Control-Allow-Origin": "*"})
@@ -126,8 +125,8 @@ def proxy_epub():
         return Response(json.dumps({"error": str(e)}), status=200, mimetype='application/json',
                         headers={"Access-Control-Allow-Origin": "*"})
 
-
 # ---------- MAIN ----------
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
+

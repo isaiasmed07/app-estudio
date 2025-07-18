@@ -53,7 +53,6 @@ function mostrarLeccionesLenguaje() {
                     epubUrl = match ? match[1] : '#';
                 }
 
-                // Usar el proxy para el visor
                 const proxyUrl = `https://app-estudio-backend.onrender.com/proxy-epub?url=${encodeURIComponent(epubUrl)}`;
 
                 const card = document.createElement("div");
