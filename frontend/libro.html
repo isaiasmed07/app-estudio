@@ -23,24 +23,14 @@
         document.addEventListener('DOMContentLoaded', async () => {
             const params = new URLSearchParams(window.location.search);
             const epubUrl = params.get('epub');
-            const epubDataUrl = sessionStorage.getItem('epubData');
 
-            if (epubDataUrl) {
-                // Abrir desde base64
-                abrirLibro(epubDataUrl);
-            } else if (epubUrl) {
+            if (epubUrl) {
                 try {
                     const response = await fetch(epubUrl);
                     if (!response.ok) throw new Error("Error al descargar el EPUB");
 
-                    const blob = await response.blob();
-
-                    const reader = new FileReader();
-                    reader.onload = function() {
-                        const base64Data = reader.result;
-                        abrirLibro(base64Data);
-                    };
-                    reader.readAsDataURL(blob);
+                    const arrayBuffer = await response.arrayBuffer();
+                    abrirLibro(arrayBuffer);
 
                 } catch (err) {
                     console.error("Error al descargar el EPUB:", err);
@@ -74,11 +64,6 @@
                     });
                 });
             }
-
-            // Limpiar al salir
-            window.onbeforeunload = () => {
-                sessionStorage.removeItem('epubData');
-            };
         });
     </script>
 </body>
