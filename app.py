@@ -112,9 +112,8 @@ def subir_epub():
 
     try:
         filename = file.filename
-        file_content = io.BytesIO(file.read())
+        file_content = file.read()  # ✅ Pasar los bytes directamente
 
-        # Elimina el content_type
         result = put(filename, file_content)
 
         return jsonify({
