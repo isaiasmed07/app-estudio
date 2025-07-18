@@ -53,8 +53,6 @@ function mostrarLeccionesLenguaje() {
                     epubUrl = match ? match[1] : '#';
                 }
 
-                const proxyUrl = `https://app-estudio-backend.onrender.com/proxy-epub?url=${encodeURIComponent(epubUrl)}`;
-
                 const card = document.createElement("div");
                 card.classList.add("clase-card");
 
@@ -62,7 +60,7 @@ function mostrarLeccionesLenguaje() {
                     <img src="https://cdn-icons-png.flaticon.com/512/2972/2972341.png" alt="EPUB" width="100" height="100" style="object-fit: contain;">
                     <h4>${leccion.titulo}</h4>
                     <p>${leccion.descripcion}</p>
-                    <button onclick="abrirVisorEPUB('${encodeURIComponent(proxyUrl)}')">Abrir</button>
+                    <button onclick="abrirVisorEPUB('${encodeURIComponent(epubUrl)}')">Abrir</button>
                     <a href="${epubUrl}" target="_blank" download><button>Descargar</button></a>
                 `;
 
