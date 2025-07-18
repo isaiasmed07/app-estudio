@@ -2,7 +2,10 @@ function mostrarGradosLecciones() {
     const container = document.getElementById("contenido-lecciones");
     container.innerHTML = "<h3>Seleccione su grado:</h3>";
 
-    const grados = ["Primer Grado", "Segundo Grado", "Tercer Grado", "Cuarto Grado", "Quinto Grado", "Sexto Grado", "Séptimo Grado", "Octavo Grado", "Noveno Grado"];
+    const grados = [
+        "Primer Grado", "Segundo Grado", "Tercer Grado", "Cuarto Grado", "Quinto Grado",
+        "Sexto Grado", "Séptimo Grado", "Octavo Grado", "Noveno Grado"
+    ];
 
     grados.forEach(grado => {
         const div = document.createElement("div");
@@ -44,13 +47,14 @@ function mostrarLeccionesLenguaje() {
 
                 let epubUrl = '#';
                 if (leccion.contenido_html.startsWith('http')) {
-                    // Si ya es un enlace directo (Google Drive, etc.)
                     epubUrl = leccion.contenido_html.trim();
                 } else {
-                    // Si es un <a href=...>
                     const match = leccion.contenido_html.match(/href=['"](.*?)['"]/);
                     epubUrl = match ? match[1] : '#';
                 }
+
+                // Usar el proxy para el visor
+                const proxyUrl = `https://app-estudio-backend.onrender.com/proxy-epub?url=${encodeURIComponent(epubUrl)}`;
 
                 const card = document.createElement("div");
                 card.classList.add("clase-card");
@@ -59,7 +63,7 @@ function mostrarLeccionesLenguaje() {
                     <img src="https://cdn-icons-png.flaticon.com/512/2972/2972341.png" alt="EPUB" width="100" height="100" style="object-fit: contain;">
                     <h4>${leccion.titulo}</h4>
                     <p>${leccion.descripcion}</p>
-                    <button onclick="abrirVisorEPUB('${encodeURIComponent(epubUrl)}')">Abrir</button>
+                    <button onclick="abrirVisorEPUB('${encodeURIComponent(proxyUrl)}')">Abrir</button>
                     <a href="${epubUrl}" target="_blank" download><button>Descargar</button></a>
                 `;
 
