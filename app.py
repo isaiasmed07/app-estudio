@@ -114,8 +114,8 @@ def subir_epub():
         filename = file.filename
         file_content = io.BytesIO(file.read())
 
-        # Usar put directamente (token ya lo detecta desde el entorno)
-        result = put(filename, file_content, content_type="application/epub+zip")
+        # Elimina el content_type
+        result = put(filename, file_content)
 
         return jsonify({
             "message": "Archivo EPUB subido exitosamente.",
@@ -124,6 +124,7 @@ def subir_epub():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 # ---------- MAIN ----------
 if __name__ == '__main__':
