@@ -5,16 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visor de Libro</title>
     <link rel="stylesheet" href="style.css">
+
+    <!-- ✅ Solución: Cargar JSZip antes de epub.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="./js/epub.js"></script>
 </head>
 <body>
     <header>
         <h1>📖 Visor de Libro</h1>
     </header>
+
     <main>
         <div id="visor" style="height: 80vh; border: 1px solid #ccc; margin: 20px;"></div>
         <ul id="indice"></ul>
     </main>
+
     <footer>
         <p>© 2025 Plataforma Educativa</p>
     </footer>
