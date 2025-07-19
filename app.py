@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, Response
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 import os
 import json
@@ -12,7 +12,7 @@ from pdf2image import convert_from_bytes
 from ebooklib import epub
 from PIL import Image
 
-# Inicializar Firebase
+# ---------- Inicializar Firebase ----------
 try:
     firebase_app = get_app()
     print("Firebase ya está inicializado.")
@@ -89,21 +89,15 @@ def get_libro():
         libro = libro_ref.get()
 
         if not libro.exists:
-            print("Documento no encontrado en Firestore.")
             return jsonify({"error": "Libro no encontrado"}), 404
 
         data = libro.to_dict()
-        print(f"Datos obtenidos del documento: {data}")
-
         if data.get('grado') == grado and data.get('materia') == materia:
-            print("Parámetros coinciden. Enviando datos del libro.")
             return jsonify(data), 200
 
-        print("El libro no coincide con los parámetros proporcionados.")
         return jsonify({"error": "Libro no encontrado"}), 404
 
     except Exception as e:
-        print(f"Error al ejecutar el endpoint /api/libros: {e}")
         return jsonify({"error": str(e)}), 500
 
 # ---------- SUBIR EPUB DIRECTO ----------
@@ -117,7 +111,6 @@ def subir_epub():
     try:
         filename = file.filename
         file_content = file.read()
-
         result = put(filename, file_content)
 
         return jsonify({
@@ -128,66 +121,90 @@ def subir_epub():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# ---------- CONVERTIR PDF A EPUB ----------
-@app.route('/api/convertir-pdf', methods=['POST'])
-def convertir_pdf():
+# ---------- SUBIR PDF (asíncrono) ----------
+@app.route('/api/subir-pdf', methods=['POST'])
+def subir_pdf():
     file = request.files.get('file')
 
     if not file:
         return jsonify({"error": "Archivo no proporcionado"}), 400
 
-    if len(file.read()) > 20 * 1024 * 1024:  # 20MB
+    if file.content_length and file.content_length > 20 * 1024 * 1024:
         return jsonify({"error": "El archivo PDF supera los 20MB"}), 400
 
-    file.seek(0)  # Regresar al inicio del archivo después de .read()
+    try:
+        filename = file.filename
+        file_content = file.read()
+        result = put(filename, file_content)
+
+        return jsonify({
+            "message": "PDF recibido. Procesamiento en segundo plano.",
+            "pdf_url": result["url"]
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# ---------- PROCESAR PDF Y CONVERTIR A EPUB ----------
+@app.route('/api/procesar-pdf', methods=['POST'])
+def procesar_pdf():
+    data = request.get_json()
+    pdf_url = data.get('pdf_url')
+
+    if not pdf_url:
+        return jsonify({"error": "No se proporcionó la URL del PDF."}), 400
 
     try:
-        images = convert_from_bytes(file.read())
+        response = requests.get(pdf_url)
+        if response.status_code != 200:
+            return jsonify({"error": "No se pudo descargar el PDF."}), 400
 
-        # Crear EPUB
+        pdf_bytes = response.content
+        images = convert_from_bytes(pdf_bytes)
+
         book = epub.EpubBook()
-        book.set_identifier("pdf-convertido")
-        book.set_title("PDF Convertido a EPUB")
-        book.set_language("es")
+        book.set_identifier('pdf-to-epub')
+        book.set_title('Libro Generado')
+        book.set_language('es')
 
         spine = ['nav']
-        toc = []
+        for idx, img in enumerate(images):
+            img_byte_arr = io.BytesIO()
+            img.save(img_byte_arr, format='JPEG')
+            img_data = img_byte_arr.getvalue()
 
-        for i, image in enumerate(images):
-            img_io = io.BytesIO()
-            image.save(img_io, format='PNG')
-            img_io.seek(0)
-            img_data = img_io.read()
+            img_filename = f'image_{idx}.jpg'
+            epub_image = epub.EpubImage()
+            epub_image.file_name = img_filename
+            epub_image.media_type = 'image/jpeg'
+            epub_image.content = img_data
+            book.add_item(epub_image)
 
-            img_name = f"imagen_{i}.png"
-            epub_img = epub.EpubImage()
-            epub_img.file_name = img_name
-            epub_img.media_type = "image/png"
-            epub_img.content = img_data
-            book.add_item(epub_img)
+            html_content = f'<html><body><img src="{img_filename}" alt="Página {idx+1}" style="width:100%;"/></body></html>'
+            c = epub.EpubHtml(title=f'Página {idx+1}', file_name=f'page_{idx+1}.xhtml', content=html_content)
+            book.add_item(c)
+            spine.append(c)
 
-            html = f'<html><body><img src="{img_name}" style="width:100%;"/></body></html>'
-            chapter = epub.EpubHtml(title=f'Página {i+1}', file_name=f'page_{i+1}.xhtml', content=html)
-            book.add_item(chapter)
-            spine.append(chapter)
-            toc.append(epub.Link(f'page_{i+1}.xhtml', f'Página {i+1}', f'page_{i+1}'))
-
-        book.toc = tuple(toc)
         book.spine = spine
-
         book.add_item(epub.EpubNcx())
         book.add_item(epub.EpubNav())
 
-        epub_buffer = io.BytesIO()
-        epub.write_epub(epub_buffer, book)
-        epub_buffer.seek(0)
+        epub_bytes = io.BytesIO()
+        epub.write_epub(epub_bytes, book)
+        epub_bytes.seek(0)
 
-        filename = file.filename.replace(".pdf", ".epub")
-        result = put(filename, epub_buffer.read())
+        epub_filename = 'LibroGenerado.epub'
+        result = put(epub_filename, epub_bytes.read())
+
+        db = firestore.client()
+        db.collection('LibrosGenerados').add({
+            'original_pdf': pdf_url,
+            'epub_url': result["url"]
+        })
 
         return jsonify({
-            "message": "PDF convertido y subido exitosamente.",
-            "public_url": result["url"]
+            "message": "EPUB generado exitosamente.",
+            "epub_url": result["url"]
         }), 200
 
     except Exception as e:
