@@ -4,6 +4,7 @@ import os
 import json
 import requests
 import io
+import hashlib
 from vercel_blob import put
 
 from firebase_admin import credentials, firestore, initialize_app, get_app
@@ -137,6 +138,14 @@ def subir_pdf():
         file_content = file.read()
         result = put(filename, file_content)
 
+        # Guardar en Firestore el estado inicial
+        task_id = hashlib.md5(result["url"].encode()).hexdigest()
+        db = firestore.client()
+        db.collection('epub_tasks').document(task_id).set({
+            "status": "pendiente",
+            "pdf_url": result["url"]
+        })
+
         return jsonify({
             "message": "PDF recibido. Procesamiento en segundo plano.",
             "pdf_url": result["url"]
@@ -153,6 +162,8 @@ def procesar_pdf():
 
     if not pdf_url:
         return jsonify({"error": "No se proporcionó la URL del PDF."}), 400
+
+    task_id = hashlib.md5(pdf_url.encode()).hexdigest()
 
     try:
         response = requests.get(pdf_url)
@@ -197,9 +208,10 @@ def procesar_pdf():
         result = put(epub_filename, epub_bytes.read())
 
         db = firestore.client()
-        db.collection('LibrosGenerados').add({
-            'original_pdf': pdf_url,
-            'epub_url': result["url"]
+        db.collection('epub_tasks').document(task_id).set({
+            "status": "completado",
+            "pdf_url": pdf_url,
+            "epub_url": result["url"]
         })
 
         return jsonify({
@@ -208,9 +220,14 @@ def procesar_pdf():
         }), 200
 
     except Exception as e:
+        db = firestore.client()
+        db.collection('epub_tasks').document(task_id).set({
+            "status": "error",
+            "error": str(e)
+        })
         return jsonify({"error": str(e)}), 500
-    
 
+# ---------- CONSULTAR ESTADO ----------
 @app.route('/api/estado-epub', methods=['GET'])
 def estado_epub():
     pdf_url = request.args.get('pdf_url')
@@ -218,8 +235,9 @@ def estado_epub():
         return jsonify({"error": "Falta el parámetro pdf_url"}), 400
 
     try:
+        task_id = hashlib.md5(pdf_url.encode()).hexdigest()
         db = firestore.client()
-        task_ref = db.collection('epub_tasks').document(pdf_url)
+        task_ref = db.collection('epub_tasks').document(task_id)
         task = task_ref.get()
 
         if not task.exists:
@@ -230,7 +248,6 @@ def estado_epub():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 # ---------- MAIN ----------
 if __name__ == '__main__':
