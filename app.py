@@ -4,6 +4,7 @@ import os
 import json
 import requests
 import io
+import hashlib
 from vercel_blob import put
 
 from firebase_admin import credentials, firestore, initialize_app, get_app
@@ -26,6 +27,9 @@ except ValueError:
 
 app = Flask(__name__)
 CORS(app)
+
+def url_to_hash(url):
+    return hashlib.sha256(url.encode()).hexdigest()
 
 # ---------- CLASES ----------
 @app.route('/api/clases', methods=['GET'])
@@ -135,6 +139,14 @@ def subir_pdf():
         file_content = file.read()
         result = put(filename, file_content, options={"allowOverwrite": True})
 
+        # Crear tarea en Firestore
+        db = firestore.client()
+        hash_id = url_to_hash(result["url"])
+        db.collection('epub_tasks').document(hash_id).set({
+            "status": "pending",
+            "pdf_url": result["url"]
+        })
+
         return jsonify({
             "message": "PDF recibido. Procesamiento en segundo plano.",
             "pdf_url": result["url"]
@@ -198,9 +210,12 @@ def procesar_pdf():
         epub_filename = 'LibroGenerado.epub'
         result = put(epub_filename, epub_bytes.read(), options={"allowOverwrite": True})
 
+        # Guardar estado en Firestore
         db = firestore.client()
-        db.collection('LibrosGenerados').add({
-            'original_pdf': pdf_url,
+        hash_id = url_to_hash(pdf_url)
+        db.collection('epub_tasks').document(hash_id).set({
+            'status': 'done',
+            'pdf_url': pdf_url,
             'epub_url': result["url"]
         })
 
@@ -208,6 +223,28 @@ def procesar_pdf():
             "message": "EPUB generado exitosamente.",
             "epub_url": result["url"]
         }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# ---------- ESTADO EPUB ----------
+@app.route('/api/estado-epub', methods=['GET'])
+def estado_epub():
+    pdf_url = request.args.get('pdf_url')
+    if not pdf_url:
+        return jsonify({"error": "Falta el parámetro pdf_url"}), 400
+
+    try:
+        db = firestore.client()
+        hash_id = url_to_hash(pdf_url)
+        task_ref = db.collection('epub_tasks').document(hash_id)
+        task = task_ref.get()
+
+        if not task.exists:
+            return jsonify({"status": "not_found"}), 404
+
+        data = task.to_dict()
+        return jsonify(data), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
