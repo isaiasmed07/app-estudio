@@ -4,12 +4,11 @@ import os
 import json
 import requests
 import io
-import hashlib
 from vercel_blob import put
 
 from firebase_admin import credentials, firestore, initialize_app, get_app
 
-from pdf2image import convert_from_bytes
+import fitz  # PyMuPDF
 from ebooklib import epub
 from PIL import Image
 
@@ -83,8 +82,6 @@ def get_libro():
     try:
         grado = request.args.get('grado')
         materia = request.args.get('materia')
-        print(f"Parámetros recibidos: grado={grado}, materia={materia}")
-
         db = firestore.client()
         libro_ref = db.collection('libros').document('UGnlQLnPrig55tSmgeTu')
         libro = libro_ref.get()
@@ -112,7 +109,7 @@ def subir_epub():
     try:
         filename = file.filename
         file_content = file.read()
-        result = put(filename, file_content)
+        result = put(filename, file_content, options={"allowOverwrite": True})
 
         return jsonify({
             "message": "Archivo EPUB subido exitosamente.",
@@ -136,15 +133,7 @@ def subir_pdf():
     try:
         filename = file.filename
         file_content = file.read()
-        result = put(filename, file_content)
-
-        # Guardar en Firestore el estado inicial
-        task_id = hashlib.md5(result["url"].encode()).hexdigest()
-        db = firestore.client()
-        db.collection('epub_tasks').document(task_id).set({
-            "status": "pendiente",
-            "pdf_url": result["url"]
-        })
+        result = put(filename, file_content, options={"allowOverwrite": True})
 
         return jsonify({
             "message": "PDF recibido. Procesamiento en segundo plano.",
@@ -163,15 +152,14 @@ def procesar_pdf():
     if not pdf_url:
         return jsonify({"error": "No se proporcionó la URL del PDF."}), 400
 
-    task_id = hashlib.md5(pdf_url.encode()).hexdigest()
-
     try:
         response = requests.get(pdf_url)
         if response.status_code != 200:
             return jsonify({"error": "No se pudo descargar el PDF."}), 400
 
         pdf_bytes = response.content
-        images = convert_from_bytes(pdf_bytes)
+
+        doc = fitz.open(stream=pdf_bytes, filetype="pdf")
 
         book = epub.EpubBook()
         book.set_identifier('pdf-to-epub')
@@ -179,7 +167,10 @@ def procesar_pdf():
         book.set_language('es')
 
         spine = ['nav']
-        for idx, img in enumerate(images):
+        for idx, page in enumerate(doc):
+            pix = page.get_pixmap()
+            img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+
             img_byte_arr = io.BytesIO()
             img.save(img_byte_arr, format='JPEG')
             img_data = img_byte_arr.getvalue()
@@ -205,46 +196,18 @@ def procesar_pdf():
         epub_bytes.seek(0)
 
         epub_filename = 'LibroGenerado.epub'
-        result = put(epub_filename, epub_bytes.read())
+        result = put(epub_filename, epub_bytes.read(), options={"allowOverwrite": True})
 
         db = firestore.client()
-        db.collection('epub_tasks').document(task_id).set({
-            "status": "completado",
-            "pdf_url": pdf_url,
-            "epub_url": result["url"]
+        db.collection('LibrosGenerados').add({
+            'original_pdf': pdf_url,
+            'epub_url': result["url"]
         })
 
         return jsonify({
             "message": "EPUB generado exitosamente.",
             "epub_url": result["url"]
         }), 200
-
-    except Exception as e:
-        db = firestore.client()
-        db.collection('epub_tasks').document(task_id).set({
-            "status": "error",
-            "error": str(e)
-        })
-        return jsonify({"error": str(e)}), 500
-
-# ---------- CONSULTAR ESTADO ----------
-@app.route('/api/estado-epub', methods=['GET'])
-def estado_epub():
-    pdf_url = request.args.get('pdf_url')
-    if not pdf_url:
-        return jsonify({"error": "Falta el parámetro pdf_url"}), 400
-
-    try:
-        task_id = hashlib.md5(pdf_url.encode()).hexdigest()
-        db = firestore.client()
-        task_ref = db.collection('epub_tasks').document(task_id)
-        task = task_ref.get()
-
-        if not task.exists:
-            return jsonify({"status": "not_found"}), 404
-
-        data = task.to_dict()
-        return jsonify(data), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
