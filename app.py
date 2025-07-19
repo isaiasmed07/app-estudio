@@ -209,6 +209,28 @@ def procesar_pdf():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+
+@app.route('/api/estado-epub', methods=['GET'])
+def estado_epub():
+    pdf_url = request.args.get('pdf_url')
+    if not pdf_url:
+        return jsonify({"error": "Falta el parámetro pdf_url"}), 400
+
+    try:
+        db = firestore.client()
+        task_ref = db.collection('epub_tasks').document(pdf_url)
+        task = task_ref.get()
+
+        if not task.exists:
+            return jsonify({"status": "not_found"}), 404
+
+        data = task.to_dict()
+        return jsonify(data), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 # ---------- MAIN ----------
 if __name__ == '__main__':
