@@ -11,15 +11,17 @@
 
     <style>
         #visor {
-            height: 80vh;
-            border: 1px solid #ccc;
-            margin: 20px auto;
+            height: 85vh;
             max-width: 90%;
+            margin: 20px auto;
+            border: 1px solid #ccc;
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            position: relative;
+            background: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-radius: 10px;
         }
 
         #botones-navegacion {
@@ -93,14 +95,14 @@
                 const rendition = book.renderTo("visor", {
                     width: "100%",
                     height: "100%",
-                    flow: "scrolled-doc",
+                    flow: "paginated",
                     manager: "default",
                     spread: "none"
                 });
 
                 rendition.display();
 
-                // Centrar contenido dentro del iframe generado por epub.js
+                // Aplicar estilos al contenido del iframe EPUB
                 rendition.on("rendered", () => {
                     const doc = rendition.getContents()[0];
                     if (doc) {
@@ -110,13 +112,20 @@
                                 display: flex;
                                 justify-content: center;
                                 align-items: center;
-                                height: 100vh;
+                                height: 100%;
+                                background: white;
                             }
                             img {
-                                max-width: 100%;
-                                max-height: 100%;
+                                max-width: 90vw;
+                                max-height: 80vh;
                                 object-fit: contain;
                                 display: block;
+                                margin: auto;
+                            }
+                            html, body {
+                                width: 100%;
+                                height: 100%;
+                                overflow: hidden;
                             }
                         `;
                         doc.addStylesheet(null, style);
@@ -145,12 +154,7 @@
                     }
                 });
 
-                // Navegación por clic (PC)
-                document.getElementById("visor").addEventListener("click", function() {
-                    rendition.next();
-                });
-
-                // Navegación táctil (móvil)
+                // Swipe táctil (corregido)
                 let touchStartX = 0;
                 let touchEndX = 0;
 
@@ -160,19 +164,15 @@
 
                 document.getElementById("visor").addEventListener("touchend", function(e) {
                     touchEndX = e.changedTouches[0].screenX;
-                    handleGesture();
-                });
-
-                function handleGesture() {
-                    const swipeThreshold = 50; // px
+                    const swipeThreshold = 50;
                     if (touchEndX < touchStartX - swipeThreshold) {
                         rendition.next();
                     } else if (touchEndX > touchStartX + swipeThreshold) {
                         rendition.prev();
                     }
-                }
+                });
 
-                // Botones de navegación
+                // Botones
                 document.getElementById("anterior").addEventListener("click", () => {
                     rendition.prev();
                 });
