@@ -10,12 +10,18 @@
     <script src="./js/epub.js"></script>
 
     <style>
-        #visor iframe, #visor img {
-            object-fit: contain !important;
-            width: 100% !important;
-            height: auto !important;
-            margin: auto !important;
-            display: block !important;
+        #visor {
+            height: 80vh;
+            border: 1px solid #ccc;
+            margin: 20px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        #indice {
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -25,7 +31,7 @@
     </header>
 
     <main>
-        <div id="visor" style="height: 80vh; border: 1px solid #ccc; margin: 20px; position: relative;"></div>
+        <div id="visor"></div>
         <ul id="indice"></ul>
     </main>
 
@@ -61,12 +67,35 @@
                 const rendition = book.renderTo("visor", {
                     width: "100%",
                     height: "100%",
-                    flow: "scrolled-doc", // ✅ Desactivamos paginación rígida para imágenes verticales
+                    flow: "scrolled-doc",
                     manager: "default",
-                    spread: "none" // ✅ No forzar doble página en pantallas grandes
+                    spread: "none"
                 });
 
                 rendition.display();
+
+                // 💡 Ajustar imágenes dentro de los iframes generados por epub.js
+                rendition.on("rendered", (section) => {
+                    const doc = rendition.getContents()[0];
+                    if (doc) {
+                        const style = `
+                            body {
+                                margin: 0;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                height: 100%;
+                            }
+                            img {
+                                max-width: 100%;
+                                max-height: 100%;
+                                object-fit: contain;
+                                display: block;
+                            }
+                        `;
+                        doc.addStylesheet(null, style);
+                    }
+                });
 
                 // Generar índice dinámico
                 book.loaded.navigation.then(function(toc) {
