@@ -5,18 +5,78 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Archivos</title>
     <style>
-        body { font-family: Arial; background: #f4f4f9; padding: 20px; }
-        h1 { color: #6a11cb; }
-        .file-item { background: white; padding: 10px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
-        .file-url { word-break: break-all; }
-        button { padding: 5px 10px; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        button:hover { background: #c0392b; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f9;
+            padding: 20px;
+            margin: 0;
+        }
+
+        h1 {
+            color: #6a11cb;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .file-item {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .file-url {
+            word-break: break-word;
+            color: #333;
+        }
+
+        .file-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        button {
+            padding: 8px 15px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        button:hover {
+            background: #c0392b;
+        }
+
+        .size {
+            color: #666;
+            font-size: 0.8rem;
+        }
+
+        @media (min-width: 600px) {
+            .file-item {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .file-url {
+                flex: 1;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <h1>📂 Archivos en Vercel Blob</h1>
-    <div id="archivos"></div>
+    <h1>📂 Gestión de Archivos en Vercel Blob</h1>
+    <div id="archivos">Cargando archivos...</div>
 
     <script>
         async function cargarArchivos() {
@@ -25,14 +85,25 @@
             const contenedor = document.getElementById('archivos');
             contenedor.innerHTML = '';
 
+            if (data.archivos.length === 0) {
+                contenedor.innerHTML = '<p>No hay archivos almacenados.</p>';
+                return;
+            }
+
             data.archivos.forEach(archivo => {
                 const div = document.createElement('div');
                 div.className = 'file-item';
 
                 div.innerHTML = `
-                    <div class="file-url">${archivo.url} <br><small>${(archivo.size/1024).toFixed(2)} KB</small></div>
-                    <button onclick="eliminarArchivo('${archivo.url}')">Eliminar</button>
+                    <div class="file-url">
+                        <a href="${archivo.url}" target="_blank">${archivo.url}</a><br>
+                        <span class="size">${(archivo.size/1024).toFixed(2)} KB</span>
+                    </div>
+                    <div class="file-actions">
+                        <button onclick="eliminarArchivo('${archivo.url}')">🗑️ Eliminar</button>
+                    </div>
                 `;
+
                 contenedor.appendChild(div);
             });
         }

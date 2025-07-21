@@ -6,14 +6,13 @@ import requests
 import io
 import hashlib
 import uuid
-from vercel_blob import put
+from vercel_blob import put, list as blob_list
 
 from firebase_admin import credentials, firestore, initialize_app, get_app
 
 import fitz  # PyMuPDF
 from ebooklib import epub
 from PIL import Image
-from vercel_blob import list as blob_list, remove
 
 # ---------- Inicializar Firebase ----------
 try:
@@ -125,7 +124,7 @@ def subir_epub():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# ---------- SUBIR PDF (asíncrono) ----------
+# ---------- SUBIR PDF ----------
 @app.route('/api/subir-pdf', methods=['POST'])
 def subir_pdf():
     file = request.files.get('file')
@@ -208,7 +207,6 @@ def procesar_pdf():
         epub.write_epub(epub_bytes, book)
         epub_bytes.seek(0)
 
-        # 👉 Nombre único por cada EPUB generado
         epub_filename = f'LibroGenerado-{uuid.uuid4()}.epub'
         result = put(epub_filename, epub_bytes.read(), options={"allowOverwrite": True})
 
@@ -250,8 +248,7 @@ def estado_epub():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-
+# ---------- LISTAR ARCHIVOS ----------
 @app.route('/api/listar-archivos', methods=['GET'])
 def listar_archivos():
     try:
@@ -261,6 +258,7 @@ def listar_archivos():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# ---------- ELIMINAR ARCHIVO ----------
 @app.route('/api/eliminar-archivo', methods=['POST'])
 def eliminar_archivo():
     data = request.get_json()
@@ -269,14 +267,25 @@ def eliminar_archivo():
         return jsonify({"error": "Falta la URL"}), 400
 
     try:
-        filename = url.split("/")[-1]
-        remove(filename)
-        return jsonify({"message": f"Archivo {filename} eliminado correctamente"}), 200
+        vercel_token = os.environ.get("VERCEL_BLOB_RW_TOKEN")
+        if not vercel_token:
+            return jsonify({"error": "No se configuró VERCEL_BLOB_RW_TOKEN"}), 500
+
+        delete_url = "https://blob.vercel-storage.com/api/delete"
+
+        response = requests.delete(delete_url, headers={
+            "Authorization": f"Bearer {vercel_token}"
+        }, params={
+            "url": url
+        })
+
+        if response.status_code == 200:
+            return jsonify({"message": "Archivo eliminado correctamente"}), 200
+        else:
+            return jsonify({"error": f"No se pudo eliminar: {response.text}"}), 400
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-    
 
 # ---------- MAIN ----------
 if __name__ == '__main__':
