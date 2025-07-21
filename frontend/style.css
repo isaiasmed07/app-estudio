@@ -35,13 +35,20 @@ main {
 #visor {
     height: 80vh;
     border: 1px solid #ccc;
-    margin: 20px auto; /* Centrado horizontal */
-    max-width: 800px;   /* Limitar ancho en escritorio */
+    margin: 20px auto;
+    max-width: 800px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     background: white;
     border-radius: 10px;
-    overflow: hidden; /* Evitar desbordes */
-    touch-action: pan-y; /* Mejora la navegación táctil */
+    overflow: hidden;
+    touch-action: pan-y;
+}
+
+/* Responsive visor para móviles */
+@media (max-width: 768px) {
+    #visor {
+        height: 70vh; /* Reduce el largo del visor en móvil */
+    }
 }
 
 /* Índice (TOC) */
