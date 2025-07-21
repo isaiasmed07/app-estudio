@@ -79,8 +79,10 @@
     <div id="archivos">Cargando archivos...</div>
 
     <script>
+        const API_BASE = 'https://app-estudio-docker.onrender.com';
+
         async function cargarArchivos() {
-            const res = await fetch('/api/listar-archivos');
+            const res = await fetch(`${API_BASE}/api/listar-archivos`);
             const data = await res.json();
             const contenedor = document.getElementById('archivos');
             contenedor.innerHTML = '';
@@ -111,7 +113,7 @@
         async function eliminarArchivo(url) {
             if (!confirm('¿Seguro que deseas eliminar este archivo?')) return;
 
-            const res = await fetch('/api/eliminar-archivo', {
+            const res = await fetch(`${API_BASE}/api/eliminar-archivo`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url })
