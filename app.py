@@ -5,6 +5,7 @@ import json
 import requests
 import io
 import hashlib
+import uuid
 from vercel_blob import put
 
 from firebase_admin import credentials, firestore, initialize_app, get_app
@@ -139,7 +140,6 @@ def subir_pdf():
         file_content = file.read()
         result = put(filename, file_content, options={"allowOverwrite": True})
 
-        # Crear tarea en Firestore
         db = firestore.client()
         hash_id = url_to_hash(result["url"])
         db.collection('epub_tasks').document(hash_id).set({
@@ -207,10 +207,10 @@ def procesar_pdf():
         epub.write_epub(epub_bytes, book)
         epub_bytes.seek(0)
 
-        epub_filename = 'LibroGenerado.epub'
+        # 👉 Nombre único por cada EPUB generado
+        epub_filename = f'LibroGenerado-{uuid.uuid4()}.epub'
         result = put(epub_filename, epub_bytes.read(), options={"allowOverwrite": True})
 
-        # Guardar estado en Firestore
         db = firestore.client()
         hash_id = url_to_hash(pdf_url)
         db.collection('epub_tasks').document(hash_id).set({
