@@ -13,6 +13,7 @@ from firebase_admin import credentials, firestore, initialize_app, get_app
 import fitz  # PyMuPDF
 from ebooklib import epub
 from PIL import Image
+from vercel_blob import list as blob_list, remove
 
 # ---------- Inicializar Firebase ----------
 try:
@@ -248,6 +249,34 @@ def estado_epub():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+
+@app.route('/api/listar-archivos', methods=['GET'])
+def listar_archivos():
+    try:
+        blobs = blob_list()
+        archivos = [{"url": blob["url"], "size": blob["size"]} for blob in blobs["blobs"]]
+        return jsonify({"archivos": archivos}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/eliminar-archivo', methods=['POST'])
+def eliminar_archivo():
+    data = request.get_json()
+    url = data.get('url')
+    if not url:
+        return jsonify({"error": "Falta la URL"}), 400
+
+    try:
+        filename = url.split("/")[-1]
+        remove(filename)
+        return jsonify({"message": f"Archivo {filename} eliminado correctamente"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    
 
 # ---------- MAIN ----------
 if __name__ == '__main__':

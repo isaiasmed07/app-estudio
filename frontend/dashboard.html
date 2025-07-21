@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Archivos</title>
+    <style>
+        body { font-family: Arial; background: #f4f4f9; padding: 20px; }
+        h1 { color: #6a11cb; }
+        .file-item { background: white; padding: 10px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .file-url { word-break: break-all; }
+        button { padding: 5px 10px; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #c0392b; }
+    </style>
+</head>
+<body>
+
+    <h1>📂 Archivos en Vercel Blob</h1>
+    <div id="archivos"></div>
+
+    <script>
+        async function cargarArchivos() {
+            const res = await fetch('/api/listar-archivos');
+            const data = await res.json();
+            const contenedor = document.getElementById('archivos');
+            contenedor.innerHTML = '';
+
+            data.archivos.forEach(archivo => {
+                const div = document.createElement('div');
+                div.className = 'file-item';
+
+                div.innerHTML = `
+                    <div class="file-url">${archivo.url} <br><small>${(archivo.size/1024).toFixed(2)} KB</small></div>
+                    <button onclick="eliminarArchivo('${archivo.url}')">Eliminar</button>
+                `;
+                contenedor.appendChild(div);
+            });
+        }
+
+        async function eliminarArchivo(url) {
+            if (!confirm('¿Seguro que deseas eliminar este archivo?')) return;
+
+            const res = await fetch('/api/eliminar-archivo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url })
+            });
+
+            const data = await res.json();
+            alert(data.message || data.error);
+            cargarArchivos();
+        }
+
+        cargarArchivos();
+    </script>
+
+</body>
+</html>
