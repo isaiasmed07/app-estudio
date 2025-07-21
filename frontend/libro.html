@@ -51,9 +51,11 @@
                 const book = ePub(epubSource);
                 const rendition = book.renderTo("visor", {
                     width: "100%",
-                    height: "100%"
+                    height: "100%",
+                    flow: "paginated",
+                    manager: "default",
+                    spread: "auto"
                 });
-
                 rendition.display();
 
                 // Generar índice dinámico
@@ -69,7 +71,7 @@
                     });
                 });
 
-                // 🚀 Navegación con teclado
+                // Navegación con teclado
                 document.addEventListener("keydown", function(event) {
                     if (event.key === "ArrowRight") {
                         rendition.next();
@@ -78,10 +80,29 @@
                     }
                 });
 
-                // 🚀 Navegación por clic en visor (avanzar página)
+                // Navegación por clic en visor
                 document.getElementById("visor").addEventListener("click", function() {
                     rendition.next();
                 });
+
+                // Navegación táctil (Swipe en móviles)
+                let touchStartX = 0;
+
+                document.getElementById("visor").addEventListener("touchstart", function(e) {
+                    touchStartX = e.changedTouches[0].screenX;
+                }, false);
+
+                document.getElementById("visor").addEventListener("touchend", function(e) {
+                    let touchEndX = e.changedTouches[0].screenX;
+
+                    if (touchEndX < touchStartX - 50) {
+                        // Swipe izquierda: avanzar página
+                        rendition.next();
+                    } else if (touchEndX > touchStartX + 50) {
+                        // Swipe derecha: retroceder página
+                        rendition.prev();
+                    }
+                }, false);
             }
         });
     </script>
