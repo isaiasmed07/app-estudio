@@ -259,6 +259,7 @@ def listar_archivos():
         return jsonify({"error": str(e)}), 500
 
 # ---------- ELIMINAR ARCHIVO ----------
+
 @app.route('/api/eliminar-archivo', methods=['POST'])
 def eliminar_archivo():
     data = request.get_json()
@@ -267,25 +268,28 @@ def eliminar_archivo():
         return jsonify({"error": "Falta la URL"}), 400
 
     try:
-        vercel_token = os.environ.get("VERCEL_BLOB_RW_TOKEN")
+        filename = url.split("/")[-1]
+
+        vercel_token = os.environ.get("VERCEL_BLOB_TOKEN")  # 👉 Crea esta variable en Render dashboard
+
         if not vercel_token:
-            return jsonify({"error": "No se configuró VERCEL_BLOB_RW_TOKEN"}), 500
+            return jsonify({"error": "Falta VERCEL_BLOB_TOKEN en variables de entorno"}), 500
 
-        delete_url = "https://blob.vercel-storage.com/api/delete"
-
-        response = requests.delete(delete_url, headers={
+        delete_url = f"https://blob.vercel-storage.com/{filename}"
+        headers = {
             "Authorization": f"Bearer {vercel_token}"
-        }, params={
-            "url": url
-        })
+        }
 
-        if response.status_code == 200:
-            return jsonify({"message": "Archivo eliminado correctamente"}), 200
-        else:
-            return jsonify({"error": f"No se pudo eliminar: {response.text}"}), 400
+        response = requests.delete(delete_url, headers=headers)
+
+        if response.status_code != 200:
+            return jsonify({"error": f"No se pudo eliminar el archivo: {response.text}"}), 500
+
+        return jsonify({"message": f"Archivo {filename} eliminado correctamente"}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 # ---------- MAIN ----------
 if __name__ == '__main__':
