@@ -160,6 +160,7 @@ def subir_pdf():
 def procesar_pdf():
     data = request.get_json()
     pdf_url = data.get('pdf_url')
+    titulo = data.get('titulo', 'Libro Generado')  # Puedes pasar el nombre de la lección si lo deseas
 
     if not pdf_url:
         return jsonify({"error": "No se proporcionó la URL del PDF."}), 400
@@ -175,7 +176,7 @@ def procesar_pdf():
 
         book = epub.EpubBook()
         book.set_identifier('pdf-to-epub')
-        # book.set_title('Libro Generado')  # ❌ Ya no lo usamos
+        book.set_title(titulo)  # 👉 Aquí puedes pasar el título dinámico si quieres
         book.set_language('es')
 
         spine = []
@@ -199,7 +200,11 @@ def procesar_pdf():
             book.add_item(c)
             spine.append(c)
 
-        book.spine = ['nav'] + spine  # ✅ Solución: evitamos la página en blanco inicial
+            # 👉 Si es la primera página, usarla como portada
+            if idx == 0:
+                book.set_cover(img_filename, img_data)
+
+        book.spine = ['nav'] + spine  # Mantiene TOC sin página extra
         book.add_item(epub.EpubNcx())
         book.add_item(epub.EpubNav())
 
@@ -215,7 +220,8 @@ def procesar_pdf():
         db.collection('epub_tasks').document(hash_id).set({
             'status': 'done',
             'pdf_url': pdf_url,
-            'epub_url': result["url"]
+            'epub_url': result["url"],
+            'titulo': titulo
         })
 
         return jsonify({
