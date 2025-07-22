@@ -175,10 +175,10 @@ def procesar_pdf():
 
         book = epub.EpubBook()
         book.set_identifier('pdf-to-epub')
-#-------book.set_title('Libro Generado')----------------
+        # book.set_title('Libro Generado')  # ❌ Ya no lo usamos
         book.set_language('es')
 
-        spine = ['nav']
+        spine = []
         for idx, page in enumerate(doc):
             pix = page.get_pixmap()
             img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
@@ -199,7 +199,7 @@ def procesar_pdf():
             book.add_item(c)
             spine.append(c)
 
-        book.spine = spine
+        book.spine = ['nav'] + spine  # ✅ Solución: evitamos la página en blanco inicial
         book.add_item(epub.EpubNcx())
         book.add_item(epub.EpubNav())
 
