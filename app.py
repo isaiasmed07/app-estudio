@@ -160,12 +160,16 @@ def subir_pdf():
 def procesar_pdf():
     data = request.get_json()
     pdf_url = data.get('pdf_url')
-    titulo = data.get('titulo', 'Libro Generado')  # Puedes pasar el nombre de la lección si lo deseas
 
     if not pdf_url:
         return jsonify({"error": "No se proporcionó la URL del PDF."}), 400
 
     try:
+        # 👉 Sacar el nombre del archivo de la URL
+        filename = pdf_url.split("/")[-1]
+        nombre_base = filename.replace(".pdf", "").replace("-", " ").replace("_", " ")
+        titulo = nombre_base.title()  # Capitaliza tipo título
+
         response = requests.get(pdf_url)
         if response.status_code != 200:
             return jsonify({"error": "No se pudo descargar el PDF."}), 400
@@ -176,7 +180,7 @@ def procesar_pdf():
 
         book = epub.EpubBook()
         book.set_identifier('pdf-to-epub')
-        book.set_title(titulo)  # 👉 Aquí puedes pasar el título dinámico si quieres
+        book.set_title(titulo)   # 👉 Ahora usa el nombre del archivo como título
         book.set_language('es')
 
         spine = []
@@ -200,11 +204,7 @@ def procesar_pdf():
             book.add_item(c)
             spine.append(c)
 
-            # 👉 Si es la primera página, usarla como portada
-            if idx == 0:
-                book.set_cover(img_filename, img_data)
-
-        book.spine = ['nav'] + spine  # Mantiene TOC sin página extra
+        book.spine = ['nav'] + spine
         book.add_item(epub.EpubNcx())
         book.add_item(epub.EpubNav())
 
@@ -225,7 +225,7 @@ def procesar_pdf():
         })
 
         return jsonify({
-            "message": "EPUB generado exitosamente.",
+            "message": f"EPUB generado exitosamente con título: {titulo}.",
             "epub_url": result["url"]
         }), 200
 
