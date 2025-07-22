@@ -175,7 +175,7 @@ def procesar_pdf():
 
         book = epub.EpubBook()
         book.set_identifier('pdf-to-epub')
-        book.set_title('Libro Generado')
+#-------book.set_title('Libro Generado')----------------
         book.set_language('es')
 
         spine = ['nav']
