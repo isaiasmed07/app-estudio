@@ -126,8 +126,11 @@ def subir_epub():
 
 # ---------- SUBIR PDF ----------
 @app.route('/api/subir-pdf', methods=['POST'])
+@app.route('/api/subir-pdf', methods=['POST'])
 def subir_pdf():
     file = request.files.get('file')
+    grado = request.form.get('grado')
+    materia = request.form.get('materia')
 
     if not file:
         return jsonify({"error": "Archivo no proporcionado"}), 400
@@ -135,25 +138,43 @@ def subir_pdf():
     if file.content_length and file.content_length > 20 * 1024 * 1024:
         return jsonify({"error": "El archivo PDF supera los 20MB"}), 400
 
+    # 👉 Validar grado
+    if grado != "1":
+        return jsonify({"error": "Función no disponible para este grado. Solo PRIMER GRADO está habilitado."}), 400
+
+    # 👉 Validar materia
+    materias_disponibles = ["lenguaje", "matematicas"]
+    if materia not in materias_disponibles:
+        return jsonify({"error": "Materia no disponible para el grado actual."}), 400
+
     try:
         filename = file.filename
-        file_content = file.read()
-        result = put(filename, file_content, options={"allowOverwrite": True})
 
+        # 👉 Definir carpeta de destino
+        carpeta = f"PRIMER-GRADO/1-{materia.upper()}/{filename}"
+
+        # 👉 Subir al blob en la carpeta
+        file_content = file.read()
+        result = put(carpeta, file_content, options={"allowOverwrite": True})
+
+        # 👉 Guardar en firestore tarea pendiente
         db = firestore.client()
         hash_id = url_to_hash(result["url"])
         db.collection('epub_tasks').document(hash_id).set({
             "status": "pending",
-            "pdf_url": result["url"]
+            "pdf_url": result["url"],
+            "grado": grado,
+            "materia": materia
         })
 
         return jsonify({
-            "message": "PDF recibido. Procesamiento en segundo plano.",
+            "message": "PDF recibido y almacenado en carpeta correspondiente. Procesamiento en segundo plano.",
             "pdf_url": result["url"]
         }), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 # ---------- PROCESAR PDF Y CONVERTIR A EPUB ----------
 @app.route('/api/procesar-pdf', methods=['POST'])

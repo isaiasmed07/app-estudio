@@ -13,8 +13,35 @@
 
     <main>
         <form id="uploadForm">
+            <label>Selecciona el grado:</label><br>
+            <select id="grado" required>
+                <option value="">-- Seleccionar Grado --</option>
+                <option value="1">Primero</option>
+                <option value="2">Segundo</option>
+                <option value="3">Tercero</option>
+                <option value="4">Cuarto</option>
+                <option value="5">Quinto</option>
+                <option value="6">Sexto</option>
+                <option value="7">Séptimo</option>
+                <option value="8">Octavo</option>
+                <option value="9">Noveno</option>
+            </select>
+            <br><br>
+
+            <label>Selecciona la materia:</label><br>
+            <select id="materia" required>
+                <option value="">-- Seleccionar Materia --</option>
+                <option value="lenguaje">Lenguaje</option>
+                <option value="matematicas">Matemáticas</option>
+                <option value="sociales">Sociales</option>
+                <option value="ciencia">Ciencia</option>
+                <option value="ingles">Inglés</option>
+            </select>
+            <br><br>
+
             <input type="file" id="pdfFile" accept="application/pdf" required>
             <br><br>
+
             <button type="submit">Subir y Convertir</button>
         </form>
 
@@ -36,9 +63,22 @@
 
             const fileInput = document.getElementById('pdfFile');
             const file = fileInput.files[0];
+            const grado = document.getElementById('grado').value;
+            const materia = document.getElementById('materia').value;
 
             if (!file) {
                 alert("Selecciona un archivo PDF.");
+                return;
+            }
+
+            // Validaciones locales antes de enviar
+            if (grado !== "1") {
+                alert("Función no disponible para este grado. Solo PRIMER GRADO está habilitado.");
+                return;
+            }
+
+            if (grado === "1" && materia !== "lenguaje" && materia !== "matematicas") {
+                alert("Materia no disponible para el grado actual.");
                 return;
             }
 
@@ -46,6 +86,8 @@
 
             const formData = new FormData();
             formData.append('file', file);
+            formData.append('grado', grado);
+            formData.append('materia', materia);
 
             try {
                 // 1️⃣ Subir el PDF
