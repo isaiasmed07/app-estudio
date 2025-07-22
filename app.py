@@ -165,10 +165,19 @@ def procesar_pdf():
         return jsonify({"error": "No se proporcionó la URL del PDF."}), 400
 
     try:
-        # 👉 Sacar el nombre del archivo de la URL
+        # 👉 Extraer nombre del archivo
         filename = pdf_url.split("/")[-1]
-        nombre_base = filename.replace(".pdf", "").replace("-", " ").replace("_", " ")
-        titulo = nombre_base.title()  # Capitaliza tipo título
+        nombre_base = filename.replace(".pdf", "").replace("-", " ").replace("_", " ").strip()
+        nombre_base = ' '.join(nombre_base.split())  # Limpieza de espacios
+
+        # 👉 Buscar número de lección si está en el nombre
+        import re
+        match = re.search(r'leccion\s*(\d+)', nombre_base, re.IGNORECASE)
+        if match:
+            num_leccion = match.group(1)
+            titulo = f"Lección {num_leccion}: {nombre_base.title()}"
+        else:
+            titulo = nombre_base.title()
 
         response = requests.get(pdf_url)
         if response.status_code != 200:
@@ -180,7 +189,7 @@ def procesar_pdf():
 
         book = epub.EpubBook()
         book.set_identifier('pdf-to-epub')
-        book.set_title(titulo)   # 👉 Ahora usa el nombre del archivo como título
+        book.set_title(titulo)   # 👉 Título personalizado
         book.set_language('es')
 
         spine = []
