@@ -5,47 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plataforma Educativa</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Script local de Auth0 -->
     <script src="./js/auth0.min.js"></script>
     <script>
+        // Verificar si auth0 está definido después de cargar el script
         if (typeof auth0 === 'undefined') {
             console.error('Auth0 no se cargó correctamente.');
         } else {
             console.log('Auth0 cargado exitosamente.');
         }
     </script>
-    <script defer>
-        document.addEventListener('DOMContentLoaded', async () => {
-            const container = document.querySelector('.card-container');
-
-            const dropboxUrl = "https://www.dropbox.com/scl/fi/rrk57oymeo3h64qsrnyba/libros_primer_grado.json?rlkey=5fjynedxukz1yv4qvw659f1v4&st=udmag4d2&dl=1"; // dl=1 para descarga directa
-
-            try {
-                const res = await fetch(dropboxUrl);
-                const libros = await res.json();
-
-                libros.forEach(libro => {
-                    const card = document.createElement('div');
-                    card.classList.add('card');
-                    card.innerHTML = `
-                        <h3>📘 ${libro.titulo}</h3>
-                        <p>Libro digitalizado en formato EPUB</p>
-                        <button onclick="abrirLibro('${libro.contenido_html}')">Abrir</button>
-                        <a href="${libro.contenido_html}" download>
-                            <button>Descargar</button>
-                        </a>
-                    `;
-                    container.appendChild(card);
-                });
-            } catch (err) {
-                console.error("❌ Error al cargar libros:", err);
-            }
-        });
-
-        function abrirLibro(url) {
-            const encoded = encodeURIComponent(url);
-            window.location.href = `libro.html?epub=${encoded}`;
-        }
-    </script>
+    <!-- Script personalizado -->
+    <script src="app.js" defer></script>
 </head>
 <body>
     <header class="header">
@@ -60,7 +31,13 @@
         <section id="content-section" class="section-center">
             <h2>Explora el contenido educativo</h2>
             <div class="card-container">
-                <!-- Aquí se insertarán los libros automáticamente -->
+                <div class="card">
+                    <h3>📚 Sociales Primer Grado</h3>
+                    <p>Acceder al libro digitalizado de Sociales</p>
+                    <button onclick="cargarLibro('primer-grado', 'sociales')" class="btn-primary">
+                        Abrir Sociales
+                    </button>
+                </div>
                 <a href="lecciones.html" class="card">
                     <h3>📝 Lecciones</h3>
                     <p>Descubre temas educativos paso a paso</p>
