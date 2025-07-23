@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Libros Oficiales</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="header">
+        <h1>📘 Libros Oficiales - Primer Grado</h1>
+        <p>Explora los libros educativos digitalizados</p>
+    </header>
+
+    <main class="section-center">
+        <div id="libros-container" class="card-container">
+            <p>Cargando libros...</p>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>© 2025 Plataforma Educativa. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        const container = document.getElementById('libros-container');
+
+        // URL del JSON en Dropbox (formato raw)
+        const jsonURL = 'https://www.dropbox.com/scl/fi/rrk57oymeo3h64qsrnyba/libros_primer_grado.json?rlkey=5fjynedxukz1yv4qvw659f1v4&st=udmag4d2&raw=1';
+
+        fetch(jsonURL)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('No se pudo cargar el JSON de libros.');
+                }
+                return response.json();
+            })
+            .then(data => {
+                container.innerHTML = ''; // Limpiar mensaje de "cargando"
+
+                data.forEach(libro => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+
+                    card.innerHTML = `
+                        <h3>${libro.titulo}</h3>
+                        <p>📖 Libro oficial para primer grado</p>
+                        <a href="${libro.url}" class="btn-primary" target="_blank">Abrir Libro</a>
+                    `;
+
+                    container.appendChild(card);
+                });
+            })
+            .catch(error => {
+                console.error(error);
+                container.innerHTML = '<p style="color:red;">❌ Error al cargar los libros. Intenta más tarde.</p>';
+            });
+    </script>
+</body>
+</html>

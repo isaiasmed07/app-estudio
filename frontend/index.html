@@ -8,14 +8,12 @@
     <!-- Script local de Auth0 -->
     <script src="./js/auth0.min.js"></script>
     <script>
-        // Verificar si auth0 está definido después de cargar el script
         if (typeof auth0 === 'undefined') {
             console.error('Auth0 no se cargó correctamente.');
         } else {
             console.log('Auth0 cargado exitosamente.');
         }
     </script>
-    <!-- Script personalizado -->
     <script src="app.js" defer></script>
 </head>
 <body>
@@ -31,17 +29,17 @@
         <section id="content-section" class="section-center">
             <h2>Explora el contenido educativo</h2>
             <div class="card-container">
-                <div class="card">
-                    <h3>📚 Sociales Primer Grado</h3>
-                    <p>Acceder al libro digitalizado de Sociales</p>
-                    <button onclick="cargarLibro('primer-grado', 'sociales')" class="btn-primary">
-                        Abrir Sociales
-                    </button>
-                </div>
+                <!-- ✅ CAMBIO AQUÍ: Convertido en un enlace completo -->
+                <a href="libros.html" class="card">
+                    <h3>📚 Libros Oficiales</h3>
+                    <p>Accede a los libros digitalizados</p>
+                </a>
+
                 <a href="lecciones.html" class="card">
                     <h3>📝 Lecciones</h3>
                     <p>Descubre temas educativos paso a paso</p>
                 </a>
+
                 <a href="clases.html" class="card">
                     <h3>🧑‍🏫 Clases</h3>
                     <p>Accede a clases interactivas</p>
