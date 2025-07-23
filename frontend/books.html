@@ -1,61 +1,72 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Libros Oficiales</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Libros Oficiales</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "TU_API_KEY",
+      authDomain: "TU_DOMINIO.firebaseapp.com",
+      projectId: "TU_PROJECT_ID",
+      storageBucket: "TU_BUCKET.appspot.com",
+      messagingSenderId: "TU_ID",
+      appId: "TU_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const container = document.getElementById("libros-container");
+      container.innerHTML = "<p>Cargando libros...</p>";
+
+      try {
+        const querySnapshot = await getDocs(collection(db, "libros"));
+        container.innerHTML = "";
+
+        querySnapshot.forEach(doc => {
+          const libro = doc.data();
+
+          const card = document.createElement("div");
+          card.className = "card";
+
+          card.innerHTML = `
+            <h3>${libro.titulo}</h3>
+            <p>${libro.descripcion || "Libro sin descripción"}</p>
+            <p><strong>Materia:</strong> ${libro.materia}</p>
+            <a href="libro.html?epub=${encodeURIComponent(libro.contenido_html)}" class="btn-primary">Abrir Libro</a>
+          `;
+
+          container.appendChild(card);
+        });
+      } catch (err) {
+        console.error(err);
+        container.innerHTML = `<p style="color:red;">❌ Error al cargar libros.</p>`;
+      }
+    });
+  </script>
 </head>
 <body>
-    <header class="header">
-        <h1>📘 Libros Oficiales - Primer Grado</h1>
-        <p>Explora los libros educativos digitalizados</p>
-    </header>
+  <header class="header">
+    <h1>📘 Libros Oficiales - Primer Grado</h1>
+    <p>Explora los libros educativos digitalizados</p>
+  </header>
 
-    <main class="section-center">
-        <div id="libros-container" class="card-container">
-            <p>Cargando libros...</p>
-        </div>
-    </main>
+  <main class="section-center">
+    <div id="libros-container" class="card-container">
+      <p>Cargando libros...</p>
+    </div>
+  </main>
 
-    <footer class="footer">
-        <p>© 2025 Plataforma Educativa. Todos los derechos reservados.</p>
-    </footer>
-
-    <script>
-        const container = document.getElementById('libros-container');
-
-        // ✅ Reemplaza esto con la URL final del JSON en Firebase
-        const jsonURL = 'https://TU_FIREBASE_URL/libros_primer_grado.json';
-
-        fetch(jsonURL)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('No se pudo cargar el JSON de libros.');
-                }
-                return response.json();
-            })
-            .then(data => {
-                container.innerHTML = ''; // Limpiar mensaje de "cargando"
-
-                data.forEach(libro => {
-                    const card = document.createElement('div');
-                    card.className = 'card';
-
-                    card.innerHTML = `
-                        <h3>${libro.titulo}</h3>
-                        <p>${libro.descripcion}</p>
-                        <p><strong>Materia:</strong> ${libro.materia}</p>
-                        <a href="${libro.contenido_html}" class="btn-primary" target="_blank">📖 Abrir Libro</a>
-                    `;
-
-                    container.appendChild(card);
-                });
-            })
-            .catch(error => {
-                console.error(error);
-                container.innerHTML = '<p style="color:red;">❌ Error al cargar los libros. Intenta más tarde.</p>';
-            });
-    </script>
+  <footer class="footer">
+    <p>© 2025 Plataforma Educativa. Todos los derechos reservados.</p>
+  </footer>
 </body>
 </html>
