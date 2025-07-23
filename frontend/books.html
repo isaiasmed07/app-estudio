@@ -25,8 +25,8 @@
     <script>
         const container = document.getElementById('libros-container');
 
-        // URL del JSON en Dropbox (formato raw)
-        const jsonURL = 'https://www.dropbox.com/scl/fi/rrk57oymeo3h64qsrnyba/libros_primer_grado.json?rlkey=5fjynedxukz1yv4qvw659f1v4&st=udmag4d2&raw=1';
+        // ✅ Reemplaza esto con la URL final del JSON en Firebase
+        const jsonURL = 'https://TU_FIREBASE_URL/libros_primer_grado.json';
 
         fetch(jsonURL)
             .then(response => {
@@ -44,8 +44,9 @@
 
                     card.innerHTML = `
                         <h3>${libro.titulo}</h3>
-                        <p>📖 Libro oficial para primer grado</p>
-                        <a href="${libro.url}" class="btn-primary" target="_blank">Abrir Libro</a>
+                        <p>${libro.descripcion}</p>
+                        <p><strong>Materia:</strong> ${libro.materia}</p>
+                        <a href="${libro.contenido_html}" class="btn-primary" target="_blank">📖 Abrir Libro</a>
                     `;
 
                     container.appendChild(card);
