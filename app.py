@@ -83,25 +83,31 @@ def get_lecciones():
 
 # ---------- LIBROS ----------
 @app.route('/api/libros', methods=['GET'])
-def get_libro():
+def get_libros():
     try:
         grado = request.args.get('grado')
         materia = request.args.get('materia')
         db = firestore.client()
-        libro_ref = db.collection('libros').document('UGnlQLnPrig55tSmgeTu')
-        libro = libro_ref.get()
+        libros_ref = db.collection('libros')
+        libros = libros_ref.stream()
 
-        if not libro.exists:
-            return jsonify({"error": "Libro no encontrado"}), 404
+        resultados = []
 
-        data = libro.to_dict()
-        if data.get('grado') == grado and data.get('materia') == materia:
-            return jsonify(data), 200
+        for doc in libros:
+            contenido = doc.to_dict()
+            # Si se proporciona grado y materia, filtramos
+            if grado and materia:
+                if contenido.get("grado") == grado and contenido.get("materia") == materia:
+                    resultados.append({"id": doc.id, "contenido": contenido})
+            else:
+                # Si no hay filtros, devolver todo
+                resultados.append({"id": doc.id, "contenido": contenido})
 
-        return jsonify({"error": "Libro no encontrado"}), 404
+        return jsonify(resultados), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 # ---------- SUBIR EPUB DIRECTO ----------
 @app.route('/api/subir-epub', methods=['POST'])

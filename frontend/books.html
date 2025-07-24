@@ -5,68 +5,152 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Libros Oficiales</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    .grados-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      padding: 20px;
+    }
 
-  <!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    .grado-btn {
+      padding: 12px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background-color: #6a11cb;
+      color: white;
+      cursor: pointer;
+    }
 
-    const firebaseConfig = {
-      apiKey: "TU_API_KEY",
-      authDomain: "TU_DOMINIO.firebaseapp.com",
-      projectId: "TU_PROJECT_ID",
-      storageBucket: "TU_BUCKET.appspot.com",
-      messagingSenderId: "TU_ID",
-      appId: "TU_APP_ID"
-    };
+    .grado-btn[disabled] {
+      background-color: #ccc;
+      color: #666;
+      cursor: not-allowed;
+    }
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    .card-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
 
-    document.addEventListener("DOMContentLoaded", async () => {
-      const container = document.getElementById("libros-container");
-      container.innerHTML = "<p>Cargando libros...</p>";
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      padding: 20px;
+      text-align: center;
+    }
 
-      try {
-        const querySnapshot = await getDocs(collection(db, "libros"));
-        container.innerHTML = "";
+    .card img {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      margin-bottom: 10px;
+    }
 
-        querySnapshot.forEach(doc => {
-          const libro = doc.data();
+    .btn-primary {
+      background-color: #6a11cb;
+      color: white;
+      padding: 10px 16px;
+      margin-top: 10px;
+      text-decoration: none;
+      display: inline-block;
+      border-radius: 8px;
+    }
 
-          const card = document.createElement("div");
-          card.className = "card";
-
-          card.innerHTML = `
-            <h3>${libro.titulo}</h3>
-            <p>${libro.descripcion || "Libro sin descripción"}</p>
-            <p><strong>Materia:</strong> ${libro.materia}</p>
-            <a href="libro.html?epub=${encodeURIComponent(libro.contenido_html)}" class="btn-primary">Abrir Libro</a>
-          `;
-
-          container.appendChild(card);
-        });
-      } catch (err) {
-        console.error(err);
-        container.innerHTML = `<p style="color:red;">❌ Error al cargar libros.</p>`;
-      }
-    });
-  </script>
+    button {
+      padding: 8px 12px;
+      margin-top: 6px;
+      border-radius: 6px;
+    }
+  </style>
 </head>
 <body>
   <header class="header">
-    <h1>📘 Libros Oficiales - Primer Grado</h1>
-    <p>Explora los libros educativos digitalizados</p>
+    <h1>📘 Libros Oficiales</h1>
+    <p>Seleccione su grado para ver los libros disponibles</p>
   </header>
 
   <main class="section-center">
-    <div id="libros-container" class="card-container">
-      <p>Cargando libros...</p>
-    </div>
+    <div id="grados" class="grados-container"></div>
+    <div id="libros-container" class="card-container"></div>
   </main>
 
   <footer class="footer">
     <p>© 2025 Plataforma Educativa. Todos los derechos reservados.</p>
   </footer>
+
+  <script>
+    const grados = [
+      "Primer Grado", "Segundo Grado", "Tercer Grado",
+      "Cuarto Grado", "Quinto Grado", "Sexto Grado",
+      "Séptimo Grado", "Octavo Grado", "Noveno Grado"
+    ];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const gradosContainer = document.getElementById("grados");
+      const librosContainer = document.getElementById("libros-container");
+
+      grados.forEach((grado, index) => {
+        const btn = document.createElement("button");
+        btn.className = "grado-btn";
+        btn.textContent = grado;
+
+        if (index !== 0) {
+          btn.disabled = true;
+          btn.title = "Próximamente";
+        } else {
+          btn.onclick = () => cargarLibros(grado);
+        }
+
+        gradosContainer.appendChild(btn);
+      });
+    });
+
+    async function cargarLibros(gradoNombre) {
+      const librosContainer = document.getElementById("libros-container");
+      librosContainer.innerHTML = "<p>Cargando libros...</p>";
+
+      const gradoNumero = 1; // Solo funciona para primer grado
+
+      try {
+        const response = await fetch(`https://app-estudio-docker.onrender.com/api/libros?grado=${gradoNumero}`);
+        const data = await response.json();
+
+        librosContainer.innerHTML = "";
+
+        if (data.error || data.length === 0) {
+          librosContainer.innerHTML = "<p style='color:red;'>❌ No se encontraron libros disponibles para este grado.</p>";
+          return;
+        }
+
+        data.forEach(item => {
+          const libro = item.contenido;
+          const epubUrl = libro.contenido_html;
+
+          const card = document.createElement("div");
+          card.className = "card";
+
+          card.innerHTML = `
+            <img src="https://cdn-icons-png.flaticon.com/512/2972/2972341.png" alt="EPUB">
+            <h3>${libro.titulo}</h3>
+            <p>${libro.descripcion || "Libro sin descripción"}</p>
+            <p><strong>Materia:</strong> ${libro.materia}</p>
+            <a href="libro.html?epub=${encodeURIComponent(epubUrl)}" class="btn-primary">Abrir Libro</a><br/>
+            <a href="${epubUrl}" target="_blank" download><button>Descargar</button></a>
+          `;
+
+          librosContainer.appendChild(card);
+        });
+      } catch (err) {
+        console.error(err);
+        librosContainer.innerHTML = "<p style='color:red;'>❌ Error al cargar los libros.</p>";
+      }
+    }
+  </script>
 </body>
 </html>
