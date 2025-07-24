@@ -82,7 +82,7 @@ def get_lecciones():
         return jsonify({"error": str(e)}), 500
 
 # ---------- LIBROS ----------
-# ---------- LIBROS (listado filtrado) ----------
+# ---------- LIBROS (listado filtrado por grado y opcionalmente materia) ----------
 @app.route('/api/libros', methods=['GET'])
 def get_libros():
     try:
@@ -93,22 +93,20 @@ def get_libros():
             return jsonify({"error": "Falta parámetro 'grado'"}), 400
 
         db = firestore.client()
-        # Filtramos primero por grado
         query = db.collection('libros').where('grado', '==', grado)
-        # Si el front envía 'materia', filtramos también por ella
         if materia:
             query = query.where('materia', '==', materia.lower())
 
         docs = query.stream()
-        result = []
+        salida = []
         for doc in docs:
             data = doc.to_dict()
-            result.append({
+            salida.append({
                 "id": doc.id,
                 "contenido": data
             })
 
-        return jsonify(result), 200
+        return jsonify(salida), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
