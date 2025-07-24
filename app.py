@@ -87,23 +87,24 @@ def get_libros():
     try:
         grado = request.args.get('grado')
         materia = request.args.get('materia')
+
         db = firestore.client()
         libros_ref = db.collection('libros')
         libros = libros_ref.stream()
 
-        resultados = []
+        data = []
+        for libro in libros:
+            contenido = libro.to_dict()
+            if grado and contenido.get('grado') != grado:
+                continue
+            if materia and contenido.get('materia') != materia:
+                continue
+            data.append({"id": libro.id, "contenido": contenido})
 
-        for doc in libros:
-            contenido = doc.to_dict()
-            # Si se proporciona grado y materia, filtramos
-            if grado and materia:
-                if contenido.get("grado") == grado and contenido.get("materia") == materia:
-                    resultados.append({"id": doc.id, "contenido": contenido})
-            else:
-                # Si no hay filtros, devolver todo
-                resultados.append({"id": doc.id, "contenido": contenido})
+        if not data:
+            return jsonify([]), 200  # ← importante: responder con lista vacía
 
-        return jsonify(resultados), 200
+        return jsonify(data), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
