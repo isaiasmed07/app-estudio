@@ -93,18 +93,23 @@ def get_libros():
             return jsonify({"error": "Falta parámetro 'grado'"}), 400
 
         db = firestore.client()
-        query = db.collection('libros').where('grado', '==', grado)
+        # ⚠️ colección sensible a mayúsculas
+        query = db.collection('Libros').where('grado', '==', grado)
         if materia:
             query = query.where('materia', '==', materia.lower())
 
         docs = query.stream()
         salida = []
+        count = 0
         for doc in docs:
             data = doc.to_dict()
             salida.append({
                 "id": doc.id,
                 "contenido": data
             })
+            count += 1
+
+        print(f"[DEBUG] Encontrados {count} libros para grado={grado}, materia={materia}")
 
         return jsonify(salida), 200
 
