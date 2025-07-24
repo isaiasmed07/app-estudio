@@ -77,7 +77,9 @@
 
   <main class="section-center">
     <div id="grados" class="grados-container"></div>
-    <div id="libros-container" class="card-container"></div>
+    <div id="libros-container" class="card-container">
+      <p>Seleccione un grado para ver los libros.</p>
+    </div>
   </main>
 
   <footer class="footer">
@@ -104,18 +106,19 @@
           btn.disabled = true;
           btn.title = "Próximamente";
         } else {
-          btn.onclick = () => cargarLibros(grado);
+          btn.onclick = () => cargarLibros(index + 1);
         }
 
         gradosContainer.appendChild(btn);
       });
+
+      // Cargar automáticamente libros de Primer Grado al entrar
+      cargarLibros(1);
     });
 
-    async function cargarLibros(gradoNombre) {
+    async function cargarLibros(gradoNumero) {
       const librosContainer = document.getElementById("libros-container");
       librosContainer.innerHTML = "<p>Cargando libros...</p>";
-
-      const gradoNumero = 1; // Solo funciona para primer grado
 
       try {
         const response = await fetch(`https://app-estudio-docker.onrender.com/api/libros?grado=${gradoNumero}`);
@@ -123,7 +126,7 @@
 
         librosContainer.innerHTML = "";
 
-        if (data.error || data.length === 0) {
+        if (!Array.isArray(data) || data.length === 0) {
           librosContainer.innerHTML = "<p style='color:red;'>❌ No se encontraron libros disponibles para este grado.</p>";
           return;
         }
