@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Subir Video de Clase</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f8f9fa;
+            padding: 20px;
+        }
+        h2 {
+            text-align: center;
+        }
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 500px;
+            margin: auto;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 6px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .mensaje {
+            text-align: center;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        .exito { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h2>Agregar Video a Clases</h2>
+    <form id="videoForm">
+        <label for="titulo">Título del Video</label>
+        <input type="text" id="titulo" name="titulo" placeholder="Ej: Curso de Matemáticas" required>
+
+        <label for="url">URL de YouTube</label>
+        <input type="url" id="url" name="url" placeholder="https://www.youtube.com/..." required>
+
+        <label for="materia">Materia</label>
+        <select id="materia" name="materia" required>
+            <option value="">-- Selecciona --</option>
+            <option value="lenguaje">Lenguaje</option>
+            <option value="matematicas">Matemáticas</option>
+        </select>
+
+        <button type="submit">Subir Video</button>
+    </form>
+
+    <div class="mensaje" id="mensaje"></div>
+
+    <script>
+        document.getElementById('videoForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const titulo = document.getElementById('titulo').value.trim();
+            const url = document.getElementById('url').value.trim();
+            const materia = document.getElementById('materia').value;
+
+            const mensajeDiv = document.getElementById('mensaje');
+            mensajeDiv.textContent = "Enviando...";
+            mensajeDiv.className = "mensaje";
+
+            try {
+                const resp = await fetch("https://TU-BACKEND-RENDER/api/agregar-video", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ titulo, url, materia })
+                });
+
+                const data = await resp.json();
+                if (resp.ok) {
+                    mensajeDiv.textContent = "✅ " + data.message;
+                    mensajeDiv.className = "mensaje exito";
+                    document.getElementById('videoForm').reset();
+                } else {
+                    mensajeDiv.textContent = "❌ " + (data.error || "Error desconocido");
+                    mensajeDiv.className = "mensaje error";
+                }
+            } catch (error) {
+                mensajeDiv.textContent = "❌ Error de conexión con el servidor";
+                mensajeDiv.className = "mensaje error";
+            }
+        });
+    </script>
+</body>
+</html>

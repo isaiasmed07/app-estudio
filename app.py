@@ -339,6 +339,89 @@ def eliminar_archivo():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+
+# ---------- AGREGAR VIDEO A JSON EN DROPBOX ----------
+DROPBOX_ACCESS_TOKEN = "sl.u.AF6J3-ChtJ2ieVvVRcP1GSAzzZvh3Wix6gnUsowfGJK9_TYY1EB-gcHrpClpjikdQv-NQjAG3XEZIzoSIuPXjB1O_LFyzCS3uLy86NdyndMdnPrUWU2UdkSJuBlNSU-dEeSJWJTAEsxkMCsaH80xnXxXTtIUA9_bxoVSbEfQ1QtSv_WVgoCs6TjwmSFu1LYz2zRNPB4sKhlu0R98TRD-Qb8vB3lOCypMQErFc0thTfB3liMmIS460IgnUM4FVirJ5RlJvC2XKT-_9SzTXvbc4rs6SYt7uGkgb3MifdyrRT5GYJOzARK-T4oPl4HM8YgAI0Td3A1hMrBAebQQYMQWTdQ8GJ1lALKdmBA4Yey-fbraH9bNJSyNMpcxcr_9I6-d3socclM91mrSFKMFf-kR50OomezVA4cNRUa1U_vqROJ-JTD-PjgXDmGrPGFJ68tcTB7WYY9bGJ2rFzwSRJg63ZzSxwRR1zalqh25Vyz1GXc-VbpwTPi2rQRsLdJc7yEpciXPE9AKPFhvs6if6flZVt8xJ_A71ji2E7Pq1nIXu6NlXCwnjovhqOzvprs9RWR5kYZjrxWanQmFC4Zco8zBOqhbZDv5Tcst0Y0pObU6Gdp1oZAP4kBb9_-ElA0dOnCe_A1iFgYX9AcnlUGS1CleOJhNTvxK36fPuwsy9oBdDZWWsLway36cp1a6On-21fd2a9k7jfH7eu-mjBgFJhlCt7SWT7_2r_dY7bTTaNdf7CxoNWRRR86RYqeEmjUGq_UUgfj4wN24VoU2a5d2K9FcU9IFf1CmZHlxRZwILLH4gi-K-xx-DALYgfYRNC5jozSeXh8CJ69kobNdPgaoxCxFm3S6Z_gncRu6BY5HQx81JVbAjnLAsSaDE55x2zFHYJu2-w4Ttr9HM4qIc-rsCtYSL10exPnR6Dfb2oMmCBJ1qEbznpMy1UzsMQGAbHEiqkxvZODf2CuX-9hfXwT8LRtW2Vv7ixv3pVvOTBP83ePYxquYe_S5_m46OPY0v95sx0dCuDyPTkbxrxh_OqERho0Kumh_MrUwg0Sd42bs8Q4Ux4ePLCJ5YYb5v93GFNq7d0EHnN1p0P7cL2kganoIHllsUNSRSGJWj4zONDHiAjMBc73aF7dwbSfgixFhdAOrf183W6ndy8z4ZXP0je8dsQyIKw5EajX0U2chGjB_B8-d_MCeyDBktjVFMvtMRrvsHc9uqlRYsW3jfkOQUF1E62k8GLdjzj48zfpINnqVqvKc5NsgbH_QZ3l8fuaE0Rp9NmmUDAtfhb4VyCa7zfFnSAwxI1chc6dDiIC79ZcSS3HI9wdzcAdqU3QG68FhL3QQ-wPMnd36cQXCNXLtO-ZpmmT4BP_dDa5ot-pyUKxmBQDQoJ_U__0Q318lSHlRUBq0e4PmrZVf-jpgBY5mCLC-p0li_HFI"
+DROPBOX_FILE_PATH = "/clases.json"  # Ruta del archivo JSON en Dropbox
+
+def _download_dropbox_json():
+    """Descarga y parsea el JSON desde Dropbox."""
+    url = "https://content.dropboxapi.com/2/files/download"
+    headers = {
+        "Authorization": f"Bearer {DROPBOX_ACCESS_TOKEN}",
+        "Dropbox-API-Arg": json.dumps({"path": DROPBOX_FILE_PATH})
+    }
+    resp = requests.post(url, headers=headers, timeout=30)
+    if resp.status_code == 200:
+        try:
+            return json.loads(resp.content.decode("utf-8"))
+        except Exception:
+            return []
+    elif resp.status_code == 409:  # archivo no existe
+        return []
+    else:
+        raise Exception(f"Error Dropbox download: {resp.status_code} {resp.text}")
+
+def _upload_dropbox_json(data):
+    """Sube el JSON a Dropbox, sobrescribiendo."""
+    url = "https://content.dropboxapi.com/2/files/upload"
+    headers = {
+        "Authorization": f"Bearer {DROPBOX_ACCESS_TOKEN}",
+        "Content-Type": "application/octet-stream",
+        "Dropbox-API-Arg": json.dumps({
+            "path": DROPBOX_FILE_PATH,
+            "mode": "overwrite",
+            "autorename": False,
+            "mute": True
+        })
+    }
+    payload = json.dumps(data, ensure_ascii=False).encode("utf-8")
+    resp = requests.post(url, headers=headers, data=payload, timeout=30)
+    if resp.status_code != 200:
+        raise Exception(f"Error Dropbox upload: {resp.status_code} {resp.text}")
+    return True
+
+@app.route('/api/agregar-video', methods=['POST'])
+def agregar_video():
+    """
+    Añade un video (titulo, url, materia) al JSON en Dropbox.
+    Materias válidas: lenguaje, matematicas
+    """
+    try:
+        body = request.get_json(silent=True) or request.form.to_dict()
+
+        titulo = (body.get("titulo") or "").strip()
+        url_video = (body.get("url") or "").strip()
+        materia = (body.get("materia") or "").strip().lower()
+
+        if not titulo or not url_video or not materia:
+            return jsonify({"error": "Faltan campos: titulo, url, materia"}), 400
+
+        allowed = ["lenguaje", "matematicas"]
+        if materia not in allowed:
+            return jsonify({"error": f"Materia no válida. Opciones: {allowed}"}), 400
+
+        if not ("youtube.com" in url_video or "youtu.be" in url_video):
+            return jsonify({"error": "La URL no parece de YouTube"}), 400
+
+        data = _download_dropbox_json() or []
+
+        nuevo = {
+            "titulo": titulo,
+            "url": url_video,
+            "materia": materia
+        }
+        data.append(nuevo)
+
+        _upload_dropbox_json(data)
+
+        return jsonify({"message": "Video agregado correctamente", "item": nuevo}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 
 
 # ---------- MAIN ----------
