@@ -342,14 +342,32 @@ def eliminar_archivo():
     
 
 # ---------- AGREGAR VIDEO A JSON EN DROPBOX ----------
-
-from flask_cors import cross_origin
+from flask import request, jsonify
+from flask_cors import CORS
 import requests
 import json
 import os
-from flask import request, jsonify
 
-# Configuración para Refresh Token de Dropbox (variables de entorno)
+# ===================================
+# Configuración global de CORS
+# ===================================
+CORS(app, resources={
+    r"/api/*": {
+        "origins": ["https://app-estudio.vercel.app"],
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type"]
+    }
+})
+
+@app.before_request
+def handle_preflight():
+    """Maneja las solicitudes OPTIONS para evitar problemas de CORS"""
+    if request.method == "OPTIONS":
+        return '', 200
+
+# ===================================
+# Configuración para Refresh Token de Dropbox
+# ===================================
 DROPBOX_REFRESH_TOKEN = os.getenv("DROPBOX_REFRESH_TOKEN")
 DROPBOX_APP_KEY = os.getenv("DROPBOX_APP_KEY")
 DROPBOX_APP_SECRET = os.getenv("DROPBOX_APP_SECRET")
@@ -407,21 +425,15 @@ def _upload_dropbox_json(data):
         raise Exception(f"Error Dropbox upload: {resp.status_code} {resp.text}")
     return True
 
-@app.route('/api/agregar-video', methods=['POST', 'OPTIONS'])
-@cross_origin(
-    origins="https://app-estudio.vercel.app",  # tu dominio real del frontend
-    methods=["POST", "OPTIONS"],
-    allow_headers=["Content-Type"]
-)
+# ===================================
+# Ruta para agregar video
+# ===================================
+@app.route('/api/agregar-video', methods=['POST'])
 def agregar_video():
     """
     Añade un video (titulo, url, materia) al JSON en Dropbox.
     Materias válidas: lenguaje, matematicas.
     """
-    if request.method == "OPTIONS":
-        # Respuesta para preflight
-        return jsonify({"status": "OK"}), 200
-
     try:
         body = request.get_json(silent=True) or request.form.to_dict()
 
