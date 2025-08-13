@@ -342,6 +342,7 @@ def eliminar_archivo():
     
 
 # ---------- AGREGAR VIDEO A JSON EN DROPBOX ----------
+# ---------- AGREGAR VIDEO A JSON EN DROPBOX ----------
 from flask import request, jsonify
 from flask_cors import CORS
 import requests
@@ -371,10 +372,18 @@ def handle_preflight():
 DROPBOX_REFRESH_TOKEN = os.getenv("DROPBOX_REFRESH_TOKEN")
 DROPBOX_APP_KEY = os.getenv("DROPBOX_APP_KEY")
 DROPBOX_APP_SECRET = os.getenv("DROPBOX_APP_SECRET")
-DROPBOX_FILE_PATH = "/clases.json"  # Ruta del archivo JSON en Dropbox
+
+# Diccionario con rutas según materia
+DROPBOX_PATHS = {
+    "lenguaje": "/PRIMER GRADO/Clases/Lenguaje/CLASES.json",
+    "matematicas": "/PRIMER GRADO/Clases/Matematicas/Matematicas.json"
+}
 
 def get_dropbox_access_token():
     """Obtiene un Access Token válido usando el Refresh Token."""
+    if not DROPBOX_REFRESH_TOKEN:
+        raise Exception("Falta la variable de entorno DROPBOX_REFRESH_TOKEN")
+    
     url = "https://api.dropbox.com/oauth2/token"
     data = {
         "grant_type": "refresh_token",
@@ -386,13 +395,13 @@ def get_dropbox_access_token():
     else:
         raise Exception(f"Error al refrescar token: {resp.text}")
 
-def _download_dropbox_json():
+def _download_dropbox_json(file_path):
     """Descarga y parsea el JSON desde Dropbox."""
     access_token = get_dropbox_access_token()
     url = "https://content.dropboxapi.com/2/files/download"
     headers = {
         "Authorization": f"Bearer {access_token}",
-        "Dropbox-API-Arg": json.dumps({"path": DROPBOX_FILE_PATH})
+        "Dropbox-API-Arg": json.dumps({"path": file_path})
     }
     resp = requests.post(url, headers=headers, timeout=30)
     if resp.status_code == 200:
@@ -405,7 +414,7 @@ def _download_dropbox_json():
     else:
         raise Exception(f"Error Dropbox download: {resp.status_code} {resp.text}")
 
-def _upload_dropbox_json(data):
+def _upload_dropbox_json(file_path, data):
     """Sube el JSON a Dropbox, sobrescribiendo."""
     access_token = get_dropbox_access_token()
     url = "https://content.dropboxapi.com/2/files/upload"
@@ -413,7 +422,7 @@ def _upload_dropbox_json(data):
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/octet-stream",
         "Dropbox-API-Arg": json.dumps({
-            "path": DROPBOX_FILE_PATH,
+            "path": file_path,
             "mode": "overwrite",
             "autorename": False,
             "mute": True
@@ -451,7 +460,13 @@ def agregar_video():
         if not ("youtube.com" in url_video or "youtu.be" in url_video):
             return jsonify({"error": "La URL no parece de YouTube"}), 400
 
-        data = _download_dropbox_json() or []
+        # Obtener ruta de Dropbox según materia
+        file_path = DROPBOX_PATHS[materia]
+
+        # Descargar datos actuales
+        data = _download_dropbox_json(file_path) or []
+
+        # Agregar nuevo video
         nuevo = {
             "titulo": titulo,
             "url": url_video,
@@ -459,7 +474,8 @@ def agregar_video():
         }
         data.append(nuevo)
 
-        _upload_dropbox_json(data)
+        # Subir archivo actualizado
+        _upload_dropbox_json(file_path, data)
 
         return jsonify({"message": "Video agregado correctamente", "item": nuevo}), 200
 
