@@ -73,6 +73,9 @@
     <div class="mensaje" id="mensaje"></div>
 
     <script>
+        // 🔹 Cambia esta URL por la de tu backend en Render
+        const API_BASE = "https://app-estudio-docker.onrender.com";
+
         document.getElementById('videoForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -85,7 +88,7 @@
             mensajeDiv.className = "mensaje";
 
             try {
-                const resp = await fetch("https://TU-BACKEND-RENDER/api/agregar-video", {
+                const resp = await fetch(`${API_BASE}/api/agregar-video`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ titulo, url, materia })
