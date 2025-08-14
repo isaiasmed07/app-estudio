@@ -1,12 +1,17 @@
 // Mostrar selección de grados al cargar la página
 function mostrarGrados() {
-    const grados = ["Primer Grado", "Segundo Grado", "Tercer Grado", "Cuarto Grado", "Quinto Grado", "Sexto Grado", "Séptimo Grado", "Octavo Grado", "Noveno Grado"];
+    const grados = [
+        "Primer Grado", "Segundo Grado", "Tercer Grado", "Cuarto Grado",
+        "Quinto Grado", "Sexto Grado", "Séptimo Grado", "Octavo Grado", "Noveno Grado"
+    ];
     const container = document.getElementById("contenido");
     container.innerHTML = "<h3>Seleccione su grado:</h3>";
 
     grados.forEach(grado => {
         const div = document.createElement("div");
-        div.innerHTML = `<button onclick="seleccionarGrado('${grado}')">${grado}</button><br>${grado === "Primer Grado" ? "" : "<small>Próximamente</small>"}`;
+        div.innerHTML = `<button onclick="seleccionarGrado('${grado}')">${grado}</button><br>${
+            grado === "Primer Grado" ? "" : "<small>Próximamente</small>"
+        }`;
         container.appendChild(div);
     });
 }
@@ -19,36 +24,33 @@ function seleccionarGrado(grado) {
 
     const container = document.getElementById("contenido");
     container.innerHTML = "<h3>Seleccione la materia:</h3>";
-    container.innerHTML += `<button onclick="mostrarLenguaje()">Lenguaje</button> `;
-    container.innerHTML += `<button onclick="mostrarMatematicas()">Matemáticas</button>`;
+    container.innerHTML += `<button onclick="mostrarClases('lenguaje')">Lenguaje</button> `;
+    container.innerHTML += `<button onclick="mostrarClases('matematicas')">Matemáticas</button>`;
 }
 
-function mostrarLenguaje() {
-    cargarClases('Lenguaje', 'https://dl.dropboxusercontent.com/scl/fi/fqnqwpyr0301spia0f9n4/CLASES.json?rlkey=m103vmfupjd7zsia4gx97t2oz&st=zwnqkqo9');
-}
-
-function mostrarMatematicas() {
-    cargarClases('Matemáticas', 'https://dl.dropboxusercontent.com/scl/fi/p2rf3hamf2x2sra1gq3xv/Matematicas.json?rlkey=3z96dye0mmlojetm4wdbzp5tj&st=myvd4y7m');
-}
-
-function cargarClases(materia, jsonUrl) {
+function mostrarClases(materia) {
     const container = document.getElementById("contenido");
-    container.innerHTML = `<h3>Clases de ${materia}</h3>`;
+    container.innerHTML = `<h3>Clases de ${materia.charAt(0).toUpperCase() + materia.slice(1)}</h3>`;
 
     const gridContainer = document.createElement("div");
     gridContainer.id = "grid-clases";
-
     container.appendChild(gridContainer);
 
-    fetch(jsonUrl)
-        .then(response => response.json())
+    // Llamada al backend para obtener el JSON desde Dropbox (ruta nueva)
+    fetch(`https://app-estudio-docker.onrender.com/api/listar-videos?materia=${materia}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Error en la respuesta del servidor");
+            }
+            return response.json();
+        })
         .then(data => {
+            gridContainer.innerHTML = "";
             data.forEach(item => {
                 const div = document.createElement("div");
                 div.classList.add("clase-card");
 
                 let embedUrl = "";
-
                 if (item.url.includes("list=")) {
                     const listaID = item.url.split("list=")[1];
                     embedUrl = `https://www.youtube.com/embed/videoseries?list=${listaID}`;
