@@ -56,6 +56,34 @@ def get_clase(clase_id):
             return jsonify({"error": "Clase no encontrada"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+@app.route('/api/listar-videos', methods=['GET'])
+def listar_videos():
+    """
+    Lista los videos de una materia desde Dropbox (nueva ubicación y estructura A).
+    Parámetro GET: materia = lenguaje | matematicas
+    """
+    try:
+        materia = request.args.get("materia", "").strip().lower()
+        if materia not in ["lenguaje", "matematicas"]:
+            return jsonify({"error": "Materia no válida"}), 400
+
+        # Rutas correctas en Dropbox (carpeta Aplicaciones)
+        DROPBOX_PATHS = {
+            "lenguaje": "/Aplicaciones/plataforma_educativa_castaño/PRIMER GRADO/Clases/Lenguaje/CLASES.json",
+            "matematicas": "/Aplicaciones/plataforma_educativa_castaño/PRIMER GRADO/Clases/Matematicas/Matematicas.json"
+        }
+
+        file_path = DROPBOX_PATHS[materia]
+
+        # Descargar JSON desde Dropbox
+        data = _download_dropbox_json(file_path) or []
+
+        return jsonify(data), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 # ---------- LECCIONES ----------
 @app.route('/api/lecciones', methods=['GET'])

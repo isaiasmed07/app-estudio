@@ -29,8 +29,9 @@ function seleccionarGrado(grado) {
 }
 
 function mostrarClases(materia) {
+    const materiaNombre = materia.charAt(0).toUpperCase() + materia.slice(1);
     const container = document.getElementById("contenido");
-    container.innerHTML = `<h3>Clases de ${materia.charAt(0).toUpperCase() + materia.slice(1)}</h3>`;
+    container.innerHTML = `<h3>Clases de ${materiaNombre}</h3>`;
 
     const gridContainer = document.createElement("div");
     gridContainer.id = "grid-clases";
@@ -66,7 +67,7 @@ function mostrarClases(materia) {
             });
         })
         .catch(err => {
-            container.innerHTML += `<p>Error al cargar las clases de ${materia}.</p>`;
+            container.innerHTML += `<p>Error al cargar las clases de ${materiaNombre}.</p>`;
             console.error(err);
         });
 }
