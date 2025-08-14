@@ -373,10 +373,10 @@ DROPBOX_REFRESH_TOKEN = os.getenv("DROPBOX_REFRESH_TOKEN")
 DROPBOX_APP_KEY = os.getenv("DROPBOX_APP_KEY")
 DROPBOX_APP_SECRET = os.getenv("DROPBOX_APP_SECRET")
 
-# Diccionario con rutas según materia
+# Diccionario con rutas según materia (Ruta B en Aplicaciones)
 DROPBOX_PATHS = {
-    "lenguaje": "/PRIMER GRADO/Clases/Lenguaje/CLASES.json",
-    "matematicas": "/PRIMER GRADO/Clases/Matematicas/Matematicas.json"
+    "lenguaje": "/Aplicaciones/plataforma_educativa_castaño/PRIMER GRADO/Clases/Lenguaje/CLASES.json",
+    "matematicas": "/Aplicaciones/plataforma_educativa_castaño/PRIMER GRADO/Clases/Matematicas/Matematicas.json"
 }
 
 def get_dropbox_access_token():
@@ -449,6 +449,7 @@ def agregar_video():
         titulo = (body.get("titulo") or "").strip()
         url_video = (body.get("url") or "").strip()
         materia = (body.get("materia") or "").strip().lower()
+        publico = (body.get("publico") or "niños").strip().lower()
 
         if not titulo or not url_video or not materia:
             return jsonify({"error": "Faltan campos: titulo, url, materia"}), 400
@@ -466,11 +467,11 @@ def agregar_video():
         # Descargar datos actuales
         data = _download_dropbox_json(file_path) or []
 
-        # Agregar nuevo video
+        # Agregar nuevo video con estructura tipo Ruta A
         nuevo = {
             "titulo": titulo,
             "url": url_video,
-            "materia": materia
+            "publico": publico
         }
         data.append(nuevo)
 
