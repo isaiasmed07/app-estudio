@@ -10,6 +10,38 @@ const auth0Client = new auth0.WebAuth({
     scope: 'openid profile email'
 });
 
+// ====== Función para mostrar opciones de profesor ======
+async function mostrarOpcionesProfesor(email) {
+    try {
+        const response = await fetch(`${apiBaseUrl}/rol?email=${encodeURIComponent(email)}`);
+        if (!response.ok) throw new Error("Error consultando rol");
+        const data = await response.json();
+
+        if (data.rol === "profesor") {
+            console.log("Usuario es profesor, agregando opciones extra...");
+            const container = document.querySelector(".card-container");
+            if (container) {
+                container.innerHTML += `
+                    <a href="subir_pdf.html" class="card">
+                        <h3>📄 Subir PDF</h3>
+                        <p>Agrega nuevos documentos</p>
+                    </a>
+                    <a href="subir_video.html" class="card">
+                        <h3>🎥 Subir Video</h3>
+                        <p>Agrega clases en video</p>
+                    </a>
+                    <a href="dashboard.html" class="card">
+                        <h3>📊 Dashboard</h3>
+                        <p>Ver estadísticas y administración</p>
+                    </a>
+                `;
+            }
+        }
+    } catch (error) {
+        console.error("Error al verificar rol:", error);
+    }
+}
+
 // Función para cargar clases
 window.loadClases = async function () {
     try {
@@ -52,7 +84,7 @@ window.loadLecciones = async function () {
     }
 };
 
-// Función para mostrar el libro y su índice con lógica dinámica
+// Función para mostrar libro
 window.mostrarLibro = async function () {
     try {
         const urlParams = new URLSearchParams(window.location.search);
@@ -63,26 +95,16 @@ window.mostrarLibro = async function () {
             return;
         }
 
-        console.log('URL del archivo EPUB:', archivo); // Log para verificar la URL
-
-        // Mostrar mensaje de carga
         const visorElemento = document.getElementById("visor");
         visorElemento.innerHTML = "<p>Cargando libro, por favor espere...</p>";
 
         const visor = ePub(archivo);
-
-        console.log('Visor inicializado con archivo:', visor); // Log para verificar que el visor se inicializó
-
-        // Renderizar el libro en el visor
         await visor.renderTo("visor");
-        console.log('Contenido del visor después de renderizar:', visorElemento.innerHTML);
 
-        visorElemento.innerHTML = ""; // Eliminar mensaje de carga
+        visorElemento.innerHTML = "";
 
-        // Intentar cargar el índice
         if (visor.navigation && visor.navigation.contents) {
             const indice = await visor.navigation.contents;
-            console.log('Índice cargado:', indice);
             const indiceElemento = document.getElementById('indice');
             indice.forEach(capitulo => {
                 const li = document.createElement('li');
@@ -93,53 +115,39 @@ window.mostrarLibro = async function () {
                 indiceElemento.appendChild(li);
             });
         } else {
-            console.warn('El índice no está disponible para este archivo.');
             const indiceElemento = document.getElementById('indice');
             indiceElemento.innerHTML = "<p>El índice no está disponible para este archivo.</p>";
         }
     } catch (error) {
         console.error('Error al mostrar el libro:', error);
-
-        // Mostrar mensaje de error si falla la carga
-        const visorElemento = document.getElementById("visor");
-        visorElemento.innerHTML = "<p>Error al cargar el libro. Por favor, inténtalo de nuevo más tarde.</p>";
+        document.getElementById("visor").innerHTML = "<p>Error al cargar el libro.</p>";
     }
 };
 
-
-// Función para cargar y redirigir al libro
+// Función para cargar y redirigir libro
 window.cargarLibro = async function (grado, materia) {
     try {
         const response = await fetch(`${apiBaseUrl}/libros?grado=${grado}&materia=${materia}`);
-        if (!response.ok) {
-            throw new Error(`Error al obtener el libro: ${response.statusText}`);
-        }
+        if (!response.ok) throw new Error(`Error al obtener el libro: ${response.statusText}`);
         const libro = await response.json();
 
         if (libro.error) {
-            console.error('No se pudo cargar el libro:', libro.error);
             alert('Error: Libro no encontrado');
             return;
         }
-
-        console.log('Libro cargado:', libro);
-
-        // Redirige a libro.html con el enlace del archivo como parámetro
         window.location.href = `libro.html?archivo=${libro.archivo}`;
     } catch (error) {
         console.error('Error al cargar el libro:', error);
     }
 };
 
-// Función para iniciar sesión
+// Iniciar sesión
 window.login = function () {
-    console.log('Iniciando sesión...');
     auth0Client.authorize();
 };
 
-// Manejar la autenticación después de redirección
+// Manejar autenticación
 window.handleAuthentication = function () {
-    console.log('Procesando autenticación...');
     auth0Client.parseHash((err, authResult) => {
         if (err) {
             console.error('Error al manejar la autenticación:', err);
@@ -147,73 +155,62 @@ window.handleAuthentication = function () {
         }
 
         if (authResult && authResult.accessToken && authResult.idToken) {
-            console.log('Autenticación exitosa:', authResult);
             guardarSesion(authResult);
 
-            // Quitar el hash de la URL
+            // Guardar email
+            if (authResult.idTokenPayload && authResult.idTokenPayload.email) {
+                localStorage.setItem('userEmail', authResult.idTokenPayload.email);
+                mostrarOpcionesProfesor(authResult.idTokenPayload.email);
+            }
+
             window.history.replaceState({}, document.title, '/');
 
-            // Mostrar el contenido protegido
             const loginSection = document.getElementById('login-section');
             const contentSection = document.getElementById('content-section');
             if (loginSection && contentSection) {
                 loginSection.hidden = true;
                 contentSection.hidden = false;
-                console.log('Contenido protegido mostrado.');
-            } else {
-                console.error('No se encontraron las secciones del DOM necesarias.');
             }
-        } else {
-            console.log('No hay datos de autenticación disponibles.');
         }
     });
 };
 
-// Guardar sesión en almacenamiento local
+// Guardar sesión
 window.guardarSesion = function (authResult) {
     localStorage.setItem('accessToken', authResult.accessToken);
     localStorage.setItem('idToken', authResult.idToken);
-    console.log('Sesión guardada en el almacenamiento local.');
 };
 
-// Verificar si ya hay una sesión activa
+// Verificar sesión
 window.verificarSesion = function () {
     const accessToken = localStorage.getItem('accessToken');
     const idToken = localStorage.getItem('idToken');
+    const email = localStorage.getItem('userEmail');
+
     if (accessToken && idToken) {
-        console.log('Sesión existente detectada, mostrando contenido protegido...');
         const loginSection = document.getElementById('login-section');
         const contentSection = document.getElementById('content-section');
         if (loginSection && contentSection) {
             loginSection.hidden = true;
             contentSection.hidden = false;
+            if (email) mostrarOpcionesProfesor(email);
         }
-    } else {
-        console.log('No se encontró una sesión activa.');
     }
 };
 
-// Asignar eventos en el DOM
+// Eventos DOM
 document.addEventListener('DOMContentLoaded', () => {
     const loginButton = document.getElementById('loginBtn');
     if (loginButton) {
-        console.log('Botón de inicio de sesión encontrado, asignando evento...');
-        loginButton.addEventListener('click', () => {
-            console.log('Botón de inicio de sesión clicado.');
-            login();
-        });
-    } else {
-        console.error('Botón de inicio de sesión no encontrado.');
+        loginButton.addEventListener('click', login);
     }
 
-    // Verificar sesión activa o manejar autenticación
     if (window.location.hash.includes('access_token')) {
         handleAuthentication();
     } else {
         verificarSesion();
     }
 
-    // Mostrar el libro si estamos en libro.html
     if (document.body.contains(document.getElementById('visor'))) {
         mostrarLibro();
     }

@@ -25,10 +25,11 @@
             <h2>Comienza tu aprendizaje</h2>
             <button id="loginBtn" class="btn-primary">Iniciar sesión</button>
         </section>
-        <section id="content-section" class="section-center">
+
+        <section id="content-section" class="section-center" hidden>
             <h2>Explora el contenido educativo</h2>
-            <div class="card-container">
-                <!-- ✅ Enlace corregido -->
+            <div class="card-container" id="cards-container">
+                <!-- Tarjetas básicas visibles para todos -->
                 <a href="books.html" class="card">
                     <h3>📚 Libros Oficiales</h3>
                     <p>Accede a los libros digitalizados</p>
@@ -46,8 +47,50 @@
             </div>
         </section>
     </main>
+
     <footer class="footer">
         <p>© 2025 Plataforma Educativa. Todos los derechos reservados.</p>
     </footer>
+
+    <script>
+        // Función para agregar tarjetas solo para profesores
+        function agregarTarjetasProfesor() {
+            const container = document.getElementById("cards-container");
+            const tarjetasProfesor = `
+                <a href="subir_pdf.html" class="card">
+                    <h3>📤 Subir PDF</h3>
+                    <p>Sube material en formato PDF</p>
+                </a>
+                <a href="subir_video.html" class="card">
+                    <h3>🎥 Subir Video</h3>
+                    <p>Agrega nuevas clases en video</p>
+                </a>
+                <a href="dashboard.html" class="card">
+                    <h3>📊 Dashboard</h3>
+                    <p>Gestiona el contenido y estadísticas</p>
+                </a>
+            `;
+            container.insertAdjacentHTML('beforeend', tarjetasProfesor);
+        }
+
+        // Cuando el usuario ya esté logueado, obtenemos su email y verificamos rol
+        document.addEventListener("DOMContentLoaded", async () => {
+            const email = localStorage.getItem("userEmail");
+            if (email) {
+                document.getElementById("login-section").hidden = true;
+                document.getElementById("content-section").hidden = false;
+
+                try {
+                    const res = await fetch(`https://app-estudio-docker.onrender.com/api/rol?email=${encodeURIComponent(email)}`);
+                    const data = await res.json();
+                    if (data.rol === "profesor") {
+                        agregarTarjetasProfesor();
+                    }
+                } catch (err) {
+                    console.error("Error al verificar rol:", err);
+                }
+            }
+        });
+    </script>
 </body>
 </html>

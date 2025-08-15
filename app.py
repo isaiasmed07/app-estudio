@@ -109,7 +109,7 @@ def get_lecciones():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# ---------- LIBROS ----------
+
 # ---------- LIBROS (listado filtrado por grado y opcionalmente materia) ----------
 @app.route('/api/libros', methods=['GET'])
 def get_libros():
@@ -369,7 +369,7 @@ def eliminar_archivo():
         return jsonify({"error": str(e)}), 500
     
 
-# ---------- AGREGAR VIDEO A JSON EN DROPBOX ----------
+
 # ---------- AGREGAR VIDEO A JSON EN DROPBOX ----------
 from flask import request, jsonify
 from flask_cors import CORS
@@ -510,6 +510,28 @@ def agregar_video():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+
+# ---------- ROLES (Lista blanca de profesores) ----------
+# Cargar emails de profesores desde variable de entorno (Render)
+PROFESSOR_EMAILS = {
+    e.strip().lower() for e in (os.getenv("PROFESSOR_EMAILS", "").split(","))
+    if e.strip()
+}
+
+@app.route('/api/rol', methods=['GET', 'OPTIONS'])
+def obtener_rol():
+    """Devuelve el rol del usuario según lista blanca de profesores"""
+    if request.method == 'OPTIONS':
+        return '', 200  # Preflight CORS
+
+    email = (request.args.get('email') or "").strip().lower()
+    if not email:
+        return jsonify({"error": "Falta el parámetro 'email'"}), 400
+
+    es_profe = email in PROFESSOR_EMAILS
+    return jsonify({"rol": "profesor" if es_profe else "alumno"}), 200
+
 
 
 # ---------- MAIN ----------
