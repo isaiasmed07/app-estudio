@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Plataforma Educativa</title>
-    <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- Auth0 SDK -->
     <script src="./js/auth0.min.js"></script>
     <script>
         if (typeof auth0 === 'undefined') {
@@ -13,6 +16,8 @@
             console.log('Auth0 cargado exitosamente.');
         }
     </script>
+
+    <!-- Tu lógica central (maneja login, rol y tarjetas de profesor) -->
     <script src="app.js" defer></script>
 </head>
 <body>
@@ -20,16 +25,20 @@
         <h1>🌟 Plataforma Educativa 🌟</h1>
         <p>Accede al conocimiento con facilidad y diversión</p>
     </header>
+
     <main>
+        <!-- Sección de login -->
         <section id="login-section" class="section-center">
             <h2>Comienza tu aprendizaje</h2>
             <button id="loginBtn" class="btn-primary">Iniciar sesión</button>
         </section>
 
+        <!-- Sección protegida (la muestra/oculta app.js) -->
         <section id="content-section" class="section-center" hidden>
             <h2>Explora el contenido educativo</h2>
+
             <div class="card-container" id="cards-container">
-                <!-- Tarjetas básicas visibles para todos -->
+                <!-- Tarjetas base visibles para todos -->
                 <a href="books.html" class="card">
                     <h3>📚 Libros Oficiales</h3>
                     <p>Accede a los libros digitalizados</p>
@@ -44,6 +53,10 @@
                     <h3>🧑‍🏫 Clases</h3>
                     <p>Accede a clases interactivas</p>
                 </a>
+
+                <!-- ⚠️ IMPORTANTE:
+                     NO agregues aquí tarjetas de profesor.
+                     app.js se encarga de insertarlas (y de evitar duplicados). -->
             </div>
         </section>
     </main>
@@ -52,52 +65,6 @@
         <p>© 2025 Plataforma Educativa. Todos los derechos reservados.</p>
     </footer>
 
-    <script>
-        // Agrega las tarjetas exclusivas para profesores
-        function agregarTarjetasProfesor() {
-            const container = document.getElementById("cards-container");
-
-            // 1. Elimina tarjetas anteriores de profesor para evitar duplicados
-            const existentes = container.querySelectorAll(".profesor-card");
-            existentes.forEach(card => card.remove());
-
-            // 2. Inserta nuevamente las tarjetas del profesor
-            const tarjetasProfesor = `
-                <a href="subir_pdf.html" class="card profesor-card">
-                    <h3>📤 Subir PDF</h3>
-                    <p>Sube material en formato PDF</p>
-                </a>
-                <a href="subir_video.html" class="card profesor-card">
-                    <h3>🎥 Subir Video</h3>
-                    <p>Agrega nuevas clases en video</p>
-                </a>
-                <a href="dashboard.html" class="card profesor-card">
-                    <h3>📊 Dashboard</h3>
-                    <p>Gestiona el contenido y estadísticas</p>
-                </a>
-            `;
-            container.insertAdjacentHTML('beforeend', tarjetasProfesor);
-        }
-
-        // Lógica al cargar la página
-        document.addEventListener("DOMContentLoaded", async () => {
-            const email = localStorage.getItem("userEmail");
-            if (email) {
-                document.getElementById("login-section").hidden = true;
-                document.getElementById("content-section").hidden = false;
-
-                try {
-                    const res = await fetch(`https://app-estudio-docker.onrender.com/api/rol?email=${encodeURIComponent(email)}`);
-                    const data = await res.json();
-
-                    if (data.rol === "profesor") {
-                        agregarTarjetasProfesor();
-                    }
-                } catch (err) {
-                    console.error("Error al verificar rol:", err);
-                }
-            }
-        });
-    </script>
+    <!-- Sin scripts inline que añadan tarjetas; todo lo maneja app.js -->
 </body>
 </html>
