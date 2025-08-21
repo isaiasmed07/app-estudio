@@ -53,28 +53,31 @@
     </footer>
 
     <script>
-        // Función para agregar tarjetas solo para profesores evitando duplicados
+        // Función para agregar tarjetas solo para profesores, evitando duplicados
         function agregarTarjetasProfesor() {
             const container = document.getElementById("cards-container");
 
-            // Evitar duplicados comprobando si ya existe una de las tarjetas
-            if (!container.querySelector('[href="subir_pdf.html"]')) {
-                const tarjetasProfesor = `
-                    <a href="subir_pdf.html" class="card">
-                        <h3>📤 Subir PDF</h3>
-                        <p>Sube material en formato PDF</p>
-                    </a>
-                    <a href="subir_video.html" class="card">
-                        <h3>🎥 Subir Video</h3>
-                        <p>Agrega nuevas clases en video</p>
-                    </a>
-                    <a href="dashboard.html" class="card">
-                        <h3>📊 Dashboard</h3>
-                        <p>Gestiona el contenido y estadísticas</p>
-                    </a>
-                `;
-                container.insertAdjacentHTML('beforeend', tarjetasProfesor);
+            // Si ya existen tarjetas de profesor, no se agregan nuevamente
+            if (container.querySelector(".profesor-card")) {
+                console.log("Tarjetas de profesor ya insertadas.");
+                return;
             }
+
+            const tarjetasProfesor = `
+                <a href="subir_pdf.html" class="card profesor-card">
+                    <h3>📤 Subir PDF</h3>
+                    <p>Sube material en formato PDF</p>
+                </a>
+                <a href="subir_video.html" class="card profesor-card">
+                    <h3>🎥 Subir Video</h3>
+                    <p>Agrega nuevas clases en video</p>
+                </a>
+                <a href="dashboard.html" class="card profesor-card">
+                    <h3>📊 Dashboard</h3>
+                    <p>Gestiona el contenido y estadísticas</p>
+                </a>
+            `;
+            container.insertAdjacentHTML('beforeend', tarjetasProfesor);
         }
 
         // Cuando el usuario ya esté logueado, obtenemos su email y verificamos rol
