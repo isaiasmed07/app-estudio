@@ -53,16 +53,15 @@
     </footer>
 
     <script>
-        // Función para agregar tarjetas solo para profesores, evitando duplicados
+        // Agrega las tarjetas exclusivas para profesores
         function agregarTarjetasProfesor() {
             const container = document.getElementById("cards-container");
 
-            // Si ya existen tarjetas de profesor, no se agregan nuevamente
-            if (container.querySelector(".profesor-card")) {
-                console.log("Tarjetas de profesor ya insertadas.");
-                return;
-            }
+            // 1. Elimina tarjetas anteriores de profesor para evitar duplicados
+            const existentes = container.querySelectorAll(".profesor-card");
+            existentes.forEach(card => card.remove());
 
+            // 2. Inserta nuevamente las tarjetas del profesor
             const tarjetasProfesor = `
                 <a href="subir_pdf.html" class="card profesor-card">
                     <h3>📤 Subir PDF</h3>
@@ -80,7 +79,7 @@
             container.insertAdjacentHTML('beforeend', tarjetasProfesor);
         }
 
-        // Cuando el usuario ya esté logueado, obtenemos su email y verificamos rol
+        // Lógica al cargar la página
         document.addEventListener("DOMContentLoaded", async () => {
             const email = localStorage.getItem("userEmail");
             if (email) {
@@ -90,6 +89,7 @@
                 try {
                     const res = await fetch(`https://app-estudio-docker.onrender.com/api/rol?email=${encodeURIComponent(email)}`);
                     const data = await res.json();
+
                     if (data.rol === "profesor") {
                         agregarTarjetasProfesor();
                     }
