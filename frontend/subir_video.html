@@ -5,20 +5,45 @@
     <title>Subir Video de Clase</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        /* --- Barra de navegación --- */
+        .navbar {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            background: linear-gradient(to right, #4b3aff, #6a11cb);
+            padding: 10px 20px;
+            color: #fff;
+            gap: 15px;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 6px 12px;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+        }
+        .navbar a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* --- Estilos de contenido --- */
         body {
             font-family: Arial, sans-serif;
             background: #f8f9fa;
             padding: 20px;
+            margin: 0;
         }
         h2 {
             text-align: center;
+            margin-top: 20px;
         }
         form {
             background: white;
             padding: 20px;
             border-radius: 8px;
             max-width: 500px;
-            margin: auto;
+            margin: 20px auto;
             box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
         label {
@@ -52,6 +77,14 @@
     </style>
 </head>
 <body>
+    <!-- Barra de navegación -->
+    <div class="navbar">
+        <a href="index.html">🏠 Home</a>
+        <a href="books.html">📚 Libros</a>
+        <a href="lecciones.html">📝 Lecciones</a>
+        <a href="clases.html">🧑‍🏫 Clases</a>
+    </div>
+
     <h2>Agregar Video a Clases</h2>
     <form id="videoForm">
         <label for="titulo">Título del Video</label>
@@ -73,7 +106,6 @@
     <div class="mensaje" id="mensaje"></div>
 
     <script>
-        // 🔹 Cambia esta URL por la de tu backend en Render
         const API_BASE = "https://app-estudio-docker.onrender.com";
 
         document.getElementById('videoForm').addEventListener('submit', async function(e) {

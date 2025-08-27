@@ -5,6 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Archivos</title>
     <style>
+        /* --- Barra de navegación --- */
+        .navbar {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            background: linear-gradient(to right, #4b3aff, #6a11cb);
+            padding: 10px 20px;
+            color: #fff;
+            gap: 15px;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 6px 12px;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+        }
+        .navbar a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* --- Contenido --- */
         body {
             font-family: Arial, sans-serif;
             background: #f4f4f9;
@@ -74,6 +97,13 @@
     </style>
 </head>
 <body>
+    <!-- Barra de navegación -->
+    <div class="navbar">
+        <a href="index.html">🏠 Home</a>
+        <a href="books.html">📚 Libros</a>
+        <a href="lecciones.html">📝 Lecciones</a>
+        <a href="clases.html">🧑‍🏫 Clases</a>
+    </div>
 
     <h1>📂 Gestión de Archivos en Vercel Blob</h1>
     <div id="archivos">Cargando archivos...</div>
@@ -126,6 +156,5 @@
 
         cargarArchivos();
     </script>
-
 </body>
 </html>

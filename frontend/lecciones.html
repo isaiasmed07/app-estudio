@@ -7,21 +7,52 @@
     <link rel="stylesheet" href="style.css">
     <script src="./js/auth0.min.js" defer></script>
     <script src="./js/lecciones.js" defer></script>
+    <style>
+        /* ====== NAVBAR ====== */
+        .navbar {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            background: linear-gradient(to right, #4b3aff, #6a11cb);
+            padding: 10px 20px;
+            color: #fff;
+            gap: 15px;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 6px 12px;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+        }
+        .navbar a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Lecciones</h1>
-        <nav>
-            <a href="index.html">Volver a la Página Principal</a>
-        </nav>
+    <!-- Barra de navegación -->
+    <div class="navbar">
+        <a href="index.html">🏠 Home</a>
+        <a href="books.html">📚 Libros</a>
+        <a href="lecciones.html">📝 Lecciones</a>
+        <a href="clases.html">🧑‍🏫 Clases</a>
+    </div>
+
+    <header class="header">
+        <h1>📝 Lecciones</h1>
+        <p>Explora y aprende con nuestras lecciones organizadas por grado y materia</p>
     </header>
-    <main>
+
+    <main class="section-center">
         <section id="contenido-lecciones">
             <!-- Aquí se cargan dinámicamente los grados, materias y lecciones -->
         </section>
     </main>
-    <footer>
-        <p>© 2025 Plataforma Educativa - Primer Grado</p>
+
+    <footer class="footer">
+        <p>© 2025 Plataforma Educativa. Todos los derechos reservados.</p>
     </footer>
 </body>
 </html>

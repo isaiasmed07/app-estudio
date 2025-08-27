@@ -5,10 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Subir PDF y Generar EPUB</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .navbar {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            background: linear-gradient(to right, #4b3aff, #6a11cb);
+            padding: 10px 20px;
+            color: #fff;
+            gap: 15px;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 6px 12px;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+        }
+        .navbar a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
 </head>
 <body>
-    <header>
+    <!-- Barra de navegación -->
+    <div class="navbar">
+        <a href="index.html">🏠 Home</a>
+        <a href="books.html">📚 Libros</a>
+        <a href="lecciones.html">📝 Lecciones</a>
+        <a href="clases.html">🧑‍🏫 Clases</a>
+    </div>
+
+    <header class="header">
         <h1>📤 Subir PDF para Generar EPUB</h1>
+        <p>Convierte materiales educativos en EPUB para su visualización</p>
     </header>
 
     <main>
@@ -49,7 +80,7 @@
         <div id="result" style="margin-top:20px;"></div>
     </main>
 
-    <footer>
+    <footer class="footer">
         <p>© 2025 Plataforma Educativa</p>
     </footer>
 
@@ -71,7 +102,6 @@
                 return;
             }
 
-            // Validaciones locales antes de enviar
             if (grado !== "1") {
                 alert("Función no disponible para este grado. Solo PRIMER GRADO está habilitado.");
                 return;
@@ -90,14 +120,12 @@
             formData.append('materia', materia);
 
             try {
-                // 1️⃣ Subir el PDF
                 const uploadResponse = await fetch('https://app-estudio-docker.onrender.com/api/subir-pdf', {
                     method: 'POST',
                     body: formData
                 });
 
                 const uploadData = await uploadResponse.json();
-
                 if (!uploadResponse.ok) {
                     throw new Error(uploadData.error || "Error al subir el archivo.");
                 }
@@ -105,7 +133,6 @@
                 const pdfUrl = uploadData.pdf_url;
                 statusDiv.textContent = "Archivo subido. Procesando conversión a EPUB...";
 
-                // 2️⃣ Procesar PDF a EPUB
                 const processResponse = await fetch('https://app-estudio-docker.onrender.com/api/procesar-pdf', {
                     method: 'POST',
                     headers: {
@@ -115,19 +142,15 @@
                 });
 
                 const processData = await processResponse.json();
-
                 if (!processResponse.ok) {
                     throw new Error(processData.error || "Error al procesar el archivo.");
                 }
 
-                // 3️⃣ Mostrar resultado
                 statusDiv.textContent = "Conversión completada ✅";
-
                 resultDiv.innerHTML = `
                     <p><strong>EPUB generado:</strong></p>
                     <a href="${processData.epub_url}" target="_blank">${processData.epub_url}</a>
                 `;
-
             } catch (error) {
                 statusDiv.textContent = "❌ Error: " + error.message;
             }
