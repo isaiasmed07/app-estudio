@@ -111,6 +111,16 @@
   </footer>
 
   <script>
+    // Bloqueo de acceso para usuarios no logueados
+    document.addEventListener('DOMContentLoaded', () => {
+      const accessToken = localStorage.getItem('accessToken');
+      if (!accessToken) {
+        alert('Debes iniciar sesión para acceder a este contenido.');
+        window.location.href = 'index.html';
+        return;
+      }
+    });
+
     const grados = [
       "Primer Grado", "Segundo Grado", "Tercer Grado",
       "Cuarto Grado", "Quinto Grado", "Sexto Grado",

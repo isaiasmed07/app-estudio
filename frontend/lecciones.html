@@ -54,5 +54,17 @@
     <footer class="footer">
         <p>© 2025 Plataforma Educativa. Todos los derechos reservados.</p>
     </footer>
+
+    <script>
+        // Bloqueo de acceso para usuarios no logueados
+        document.addEventListener('DOMContentLoaded', () => {
+            const accessToken = localStorage.getItem('accessToken');
+            if (!accessToken) {
+                alert('Debes iniciar sesión para acceder a este contenido.');
+                window.location.href = 'index.html';
+                return;
+            }
+        });
+    </script>
 </body>
 </html>
