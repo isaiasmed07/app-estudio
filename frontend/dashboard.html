@@ -111,6 +111,28 @@
     <script>
         const API_BASE = 'https://app-estudio-docker.onrender.com';
 
+        // === Control de acceso ===
+        document.addEventListener('DOMContentLoaded', () => {
+            const accessToken = localStorage.getItem('accessToken');
+            const userEmail = localStorage.getItem('userEmail');
+            const allowedEmails = ["profesor1@correo.com", "profesor2@correo.com"];
+
+            if (!accessToken) {
+                alert("Debes iniciar sesión para acceder.");
+                window.location.href = 'index.html';
+                return;
+            }
+
+            if (!allowedEmails.includes(userEmail)) {
+                alert("Acceso restringido. Solo profesores pueden entrar.");
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Cargar archivos solo si pasa las validaciones
+            cargarArchivos();
+        });
+
         async function cargarArchivos() {
             const res = await fetch(`${API_BASE}/api/listar-archivos`);
             const data = await res.json();
@@ -153,8 +175,6 @@
             alert(data.message || data.error);
             cargarArchivos();
         }
-
-        cargarArchivos();
     </script>
 </body>
 </html>

@@ -108,14 +108,34 @@
     <script>
         const API_BASE = "https://app-estudio-docker.onrender.com";
 
+        // === Control de acceso ===
+        document.addEventListener('DOMContentLoaded', () => {
+            const accessToken = localStorage.getItem('accessToken');
+            const userEmail = localStorage.getItem('userEmail');
+            const allowedEmails = ["profesor1@correo.com", "profesor2@correo.com"];
+
+            if (!accessToken) {
+                alert("Debes iniciar sesión para acceder.");
+                window.location.href = 'index.html';
+                return;
+            }
+
+            if (!allowedEmails.includes(userEmail)) {
+                alert("Acceso restringido. Solo profesores pueden entrar.");
+                window.location.href = 'index.html';
+                return;
+            }
+        });
+
+        // === Lógica para subir video ===
         document.getElementById('videoForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const titulo = document.getElementById('titulo').value.trim();
             const url = document.getElementById('url').value.trim();
             const materia = document.getElementById('materia').value;
-
             const mensajeDiv = document.getElementById('mensaje');
+
             mensajeDiv.textContent = "Enviando...";
             mensajeDiv.className = "mensaje";
 

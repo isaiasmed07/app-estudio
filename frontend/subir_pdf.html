@@ -85,6 +85,26 @@
     </footer>
 
     <script>
+        // === Control de acceso ===
+        document.addEventListener('DOMContentLoaded', () => {
+            const accessToken = localStorage.getItem('accessToken');
+            const userEmail = localStorage.getItem('userEmail'); // correo guardado al autenticarse
+            const allowedEmails = ["profesor1@correo.com", "profesor2@correo.com"];
+
+            if (!accessToken) {
+                alert("Debes iniciar sesión para acceder.");
+                window.location.href = 'index.html';
+                return;
+            }
+
+            if (!allowedEmails.includes(userEmail)) {
+                alert("Acceso restringido. Solo profesores pueden entrar.");
+                window.location.href = 'index.html';
+                return;
+            }
+        });
+
+        // === Lógica de subida de PDF ===
         const uploadForm = document.getElementById('uploadForm');
         const statusDiv = document.getElementById('status');
         const resultDiv = document.getElementById('result');
