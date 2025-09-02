@@ -85,22 +85,30 @@
     </footer>
 
     <script>
-        // === Control de acceso ===
-        document.addEventListener('DOMContentLoaded', () => {
-            const accessToken = localStorage.getItem('accessToken');
-            const userEmail = localStorage.getItem('userEmail'); // correo guardado al autenticarse
-            const allowedEmails = ["profesor1@correo.com", "profesor2@correo.com"];
+        const API_BASE = 'https://app-estudio-docker.onrender.com';
 
-            if (!accessToken) {
+        // === Control de acceso dinámico ===
+        document.addEventListener('DOMContentLoaded', async () => {
+            const accessToken = localStorage.getItem('accessToken');
+            const userEmail = (localStorage.getItem('userEmail') || '').trim().toLowerCase();
+
+            if (!accessToken || !userEmail) {
                 alert("Debes iniciar sesión para acceder.");
                 window.location.href = 'index.html';
                 return;
             }
 
-            if (!allowedEmails.includes(userEmail)) {
-                alert("Acceso restringido. Solo profesores pueden entrar.");
+            try {
+                const res = await fetch(`${API_BASE}/api/rol?email=${encodeURIComponent(userEmail)}`);
+                const data = await res.json();
+
+                if (data.rol !== 'profesor') {
+                    alert("Acceso restringido. Solo profesores pueden entrar.");
+                    window.location.href = 'index.html';
+                }
+            } catch (err) {
+                alert("Error al verificar el rol. Intenta de nuevo.");
                 window.location.href = 'index.html';
-                return;
             }
         });
 
@@ -140,7 +148,7 @@
             formData.append('materia', materia);
 
             try {
-                const uploadResponse = await fetch('https://app-estudio-docker.onrender.com/api/subir-pdf', {
+                const uploadResponse = await fetch(`${API_BASE}/api/subir-pdf`, {
                     method: 'POST',
                     body: formData
                 });
@@ -153,11 +161,9 @@
                 const pdfUrl = uploadData.pdf_url;
                 statusDiv.textContent = "Archivo subido. Procesando conversión a EPUB...";
 
-                const processResponse = await fetch('https://app-estudio-docker.onrender.com/api/procesar-pdf', {
+                const processResponse = await fetch(`${API_BASE}/api/procesar-pdf`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ pdf_url: pdfUrl })
                 });
 
