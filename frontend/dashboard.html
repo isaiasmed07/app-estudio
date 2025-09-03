@@ -111,11 +111,10 @@
     <script>
         const API_BASE = 'https://app-estudio-docker.onrender.com';
 
-        // === Control de acceso ===
-        document.addEventListener('DOMContentLoaded', () => {
+        // === Control de acceso dinámico ===
+        document.addEventListener('DOMContentLoaded', async () => {
             const accessToken = localStorage.getItem('accessToken');
             const userEmail = localStorage.getItem('userEmail');
-            const allowedEmails = ["profesor1@correo.com", "profesor2@correo.com"];
 
             if (!accessToken) {
                 alert("Debes iniciar sesión para acceder.");
@@ -123,14 +122,22 @@
                 return;
             }
 
-            if (!allowedEmails.includes(userEmail)) {
-                alert("Acceso restringido. Solo profesores pueden entrar.");
-                window.location.href = 'index.html';
-                return;
-            }
+            try {
+                const response = await fetch(`${API_BASE}/api/rol?email=${encodeURIComponent(userEmail)}`);
+                const data = await response.json();
 
-            // Cargar archivos solo si pasa las validaciones
-            cargarArchivos();
+                if (!response.ok || data.rol !== "profesor") {
+                    alert("Acceso restringido. Solo profesores pueden entrar.");
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                // ✅ Solo si es profesor, cargamos los archivos
+                cargarArchivos();
+            } catch (error) {
+                alert("Error al verificar permisos. Intenta nuevamente.");
+                window.location.href = 'index.html';
+            }
         });
 
         async function cargarArchivos() {
@@ -139,7 +146,7 @@
             const contenedor = document.getElementById('archivos');
             contenedor.innerHTML = '';
 
-            if (data.archivos.length === 0) {
+            if (!data.archivos || data.archivos.length === 0) {
                 contenedor.innerHTML = '<p>No hay archivos almacenados.</p>';
                 return;
             }

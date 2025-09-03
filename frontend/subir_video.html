@@ -108,11 +108,10 @@
     <script>
         const API_BASE = "https://app-estudio-docker.onrender.com";
 
-        // === Control de acceso ===
-        document.addEventListener('DOMContentLoaded', () => {
+        // === Control de acceso dinámico ===
+        document.addEventListener('DOMContentLoaded', async () => {
             const accessToken = localStorage.getItem('accessToken');
             const userEmail = localStorage.getItem('userEmail');
-            const allowedEmails = ["profesor1@correo.com", "profesor2@correo.com"];
 
             if (!accessToken) {
                 alert("Debes iniciar sesión para acceder.");
@@ -120,10 +119,17 @@
                 return;
             }
 
-            if (!allowedEmails.includes(userEmail)) {
-                alert("Acceso restringido. Solo profesores pueden entrar.");
+            try {
+                const response = await fetch(`${API_BASE}/api/rol?email=${encodeURIComponent(userEmail)}`);
+                const data = await response.json();
+
+                if (!response.ok || data.rol !== "profesor") {
+                    alert("Acceso restringido. Solo profesores pueden entrar.");
+                    window.location.href = 'index.html';
+                }
+            } catch (error) {
+                alert("Error al verificar permisos. Intenta nuevamente.");
                 window.location.href = 'index.html';
-                return;
             }
         });
 
