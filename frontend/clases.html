@@ -47,7 +47,18 @@
 
     <main>
         <section id="contenido">
-            <!-- Aquí se cargará dinámicamente la interfaz de grados, materias y videos -->
+            <h2>Seleccione su grado:</h2>
+
+            <!-- Botones de grados -->
+            <button class="grado-btn" onclick="mostrarMaterias(1)">Primer Grado</button>
+            <button class="grado-btn disabled">Segundo Grado<br><small>Próximamente</small></button>
+            <button class="grado-btn disabled">Tercer Grado<br><small>Próximamente</small></button>
+            <button class="grado-btn disabled">Cuarto Grado<br><small>Próximamente</small></button>
+            <button class="grado-btn disabled">Quinto Grado<br><small>Próximamente</small></button>
+            <button class="grado-btn disabled">Sexto Grado<br><small>Próximamente</small></button>
+            <button class="grado-btn disabled">Séptimo Grado<br><small>Próximamente</small></button>
+            <button class="grado-btn disabled">Octavo Grado<br><small>Próximamente</small></button>
+            <button class="grado-btn disabled">Noveno Grado<br><small>Próximamente</small></button>
         </section>
     </main>
 
@@ -58,10 +69,14 @@
                 console.log('Usuario no autenticado, redirigiendo a la página principal...');
                 window.location.href = 'index.html';
             } else {
-                console.log('Usuario autenticado, cargando contenido de clases...');
-                mostrarGrados();
+                console.log('Usuario autenticado, mostrando opciones de clases...');
             }
         });
+
+        // Simulación de función que carga materias (puedes conectarla con clases.js)
+        function mostrarMaterias(grado) {
+            alert("Mostrando materias para grado " + grado);
+        }
     </script>
 </body>
 </html>

@@ -46,8 +46,18 @@
     </header>
 
     <main class="section-center">
+        <h2>Seleccione su grado:</h2>
         <section id="contenido-lecciones">
-            <!-- Aquí se cargan dinámicamente los grados, materias y lecciones -->
+            <!-- Botones de grados -->
+            <button class="grado-btn" onclick="mostrarLecciones(1)">Primer Grado</button>
+            <button class="grado-btn disabled">Segundo Grado<br><small>Próximamente</small></button>
+            <button class="grado-btn disabled">Tercer Grado<br><small>Próximamente</small></button>
+            <button class="grado-btn disabled">Cuarto Grado<br><small>Próximamente</small></button>
+            <button class="grado-btn disabled">Quinto Grado<br><small>Próximamente</small></button>
+            <button class="grado-btn disabled">Sexto Grado<br><small>Próximamente</small></button>
+            <button class="grado-btn disabled">Séptimo Grado<br><small>Próximamente</small></button>
+            <button class="grado-btn disabled">Octavo Grado<br><small>Próximamente</small></button>
+            <button class="grado-btn disabled">Noveno Grado<br><small>Próximamente</small></button>
         </section>
     </main>
 
@@ -65,6 +75,11 @@
                 return;
             }
         });
+
+        // Simulación de función para cargar lecciones
+        function mostrarLecciones(grado) {
+            alert("Mostrando lecciones para grado " + grado);
+        }
     </script>
 </body>
 </html>
