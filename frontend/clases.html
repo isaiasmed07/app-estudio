@@ -34,17 +34,16 @@
 
         /* ====== BOTONES DE GRADOS ====== */
         #contenido {
-            text-align: center;
-            margin-top: 20px;
-        }
-        #contenido h2 {
-            margin-bottom: 20px;
-        }
-        #contenido {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
             gap: 15px;
+            margin-top: 20px;
             padding: 0 20px;
+        }
+        #contenido h2 {
+            grid-column: 1 / -1;
+            text-align: center;
+            margin-bottom: 15px;
         }
         .grado-btn {
             padding: 1rem;
@@ -105,14 +104,18 @@
         </section>
     </main>
 
+    <footer class="footer">
+        <p>© 2025 Plataforma Educativa. Todos los derechos reservados.</p>
+    </footer>
+
     <script>
+        // Bloqueo de acceso para usuarios no logueados
         document.addEventListener('DOMContentLoaded', () => {
             const accessToken = localStorage.getItem('accessToken');
             if (!accessToken) {
-                console.log('Usuario no autenticado, redirigiendo a la página principal...');
+                alert('Debes iniciar sesión para acceder a este contenido.');
                 window.location.href = 'index.html';
-            } else {
-                console.log('Usuario autenticado, mostrando opciones de clases...');
+                return;
             }
         });
 
