@@ -36,7 +36,8 @@ main {
     height: 80vh;
     border: 1px solid #ccc;
     margin: 20px auto;
-    max-width: 800px;
+    width: 100%;
+    max-width: 900px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     background: white;
     border-radius: 10px;
@@ -48,6 +49,9 @@ main {
 @media (max-width: 768px) {
     #visor {
         height: 70vh; /* Reduce el largo del visor en móvil */
+        width: 100%;  /* Ocupar todo el ancho disponible */
+        margin: 10px auto;
+        border-radius: 5px;
     }
 }
 
