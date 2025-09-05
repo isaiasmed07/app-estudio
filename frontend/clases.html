@@ -31,46 +31,6 @@
         .navbar a:hover {
             background: rgba(255, 255, 255, 0.2);
         }
-
-        /* ====== BOTONES DE GRADOS ====== */
-        #contenido {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-            padding: 0 20px;
-        }
-        #contenido h2 {
-            grid-column: 1 / -1;
-            text-align: center;
-            margin-bottom: 15px;
-        }
-        .grado-btn {
-            padding: 1rem;
-            font-size: 1rem;
-            font-weight: bold;
-            background-color: #6a11cb;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: transform 0.2s ease, background 0.3s ease;
-        }
-        .grado-btn:hover:not(.disabled) {
-            background-color: #45439e;
-            transform: translateY(-3px);
-        }
-        .grado-btn.disabled {
-            background-color: #ccc;
-            color: #666;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-        .grado-btn small {
-            display: block;
-            font-size: 0.8rem;
-            font-weight: normal;
-        }
     </style>
 </head>
 <body>
@@ -87,20 +47,20 @@
         <p>Accede a las clases organizadas por grado y materia</p>
     </header>
 
-    <main>
-        <section id="contenido">
-            <h2>Seleccione su grado:</h2>
+    <main class="section-center">
+        <h2>Seleccione su grado:</h2>
 
-            <!-- Botones de grados -->
+        <!-- Usamos el id que probablemente espera clases.js y aplicamos el mismo grid -->
+        <section id="contenido" class="grados-container">
             <button class="grado-btn" onclick="mostrarMaterias(1)">Primer Grado</button>
-            <button class="grado-btn disabled">Segundo Grado<br><small>Próximamente</small></button>
-            <button class="grado-btn disabled">Tercer Grado<br><small>Próximamente</small></button>
-            <button class="grado-btn disabled">Cuarto Grado<br><small>Próximamente</small></button>
-            <button class="grado-btn disabled">Quinto Grado<br><small>Próximamente</small></button>
-            <button class="grado-btn disabled">Sexto Grado<br><small>Próximamente</small></button>
-            <button class="grado-btn disabled">Séptimo Grado<br><small>Próximamente</small></button>
-            <button class="grado-btn disabled">Octavo Grado<br><small>Próximamente</small></button>
-            <button class="grado-btn disabled">Noveno Grado<br><small>Próximamente</small></button>
+            <button class="grado-btn disabled" disabled>Segundo Grado</button>
+            <button class="grado-btn disabled" disabled>Tercer Grado</button>
+            <button class="grado-btn disabled" disabled>Cuarto Grado</button>
+            <button class="grado-btn disabled" disabled>Quinto Grado</button>
+            <button class="grado-btn disabled" disabled>Sexto Grado</button>
+            <button class="grado-btn disabled" disabled>Séptimo Grado</button>
+            <button class="grado-btn disabled" disabled>Octavo Grado</button>
+            <button class="grado-btn disabled" disabled>Noveno Grado</button>
         </section>
     </main>
 
@@ -109,7 +69,6 @@
     </footer>
 
     <script>
-        // Bloqueo de acceso para usuarios no logueados
         document.addEventListener('DOMContentLoaded', () => {
             const accessToken = localStorage.getItem('accessToken');
             if (!accessToken) {
@@ -119,7 +78,7 @@
             }
         });
 
-        // Simulación de función que carga materias
+        // Simulación de función que carga materias (tu clases.js debería manejar esto)
         function mostrarMaterias(grado) {
             alert("Mostrando materias para grado " + grado);
         }
