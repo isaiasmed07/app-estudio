@@ -4,7 +4,7 @@ function mostrarGrados() {
         "Primer Grado", "Segundo Grado", "Tercer Grado", "Cuarto Grado",
         "Quinto Grado", "Sexto Grado", "Séptimo Grado", "Octavo Grado", "Noveno Grado"
     ];
-    const container = document.getElementById("grados");
+    const container = document.getElementById("contenido");
     container.innerHTML = "<h3>Seleccione su grado:</h3>";
 
     grados.forEach(grado => {
@@ -22,7 +22,7 @@ function seleccionarGrado(grado) {
         return;
     }
 
-    const container = document.getElementById("grados");
+    const container = document.getElementById("contenido");
     container.innerHTML = "<h3>Seleccione la materia:</h3>";
     container.innerHTML += `<button onclick="mostrarClases('lenguaje')">Lenguaje</button> `;
     container.innerHTML += `<button onclick="mostrarClases('matematicas')">Matemáticas</button>`;
@@ -30,7 +30,7 @@ function seleccionarGrado(grado) {
 
 function mostrarClases(materia) {
     const materiaNombre = materia.charAt(0).toUpperCase() + materia.slice(1);
-    const container = document.getElementById("grados");
+    const container = document.getElementById("contenido");
     container.innerHTML = `<h3>Clases de ${materiaNombre}</h3>`;
 
     const gridContainer = document.createElement("div");
