@@ -12,6 +12,7 @@ function mostrarGrados() {
         const btn = document.createElement("button");
         btn.textContent = grado;
         btn.className = "grado-btn";
+
         if (grado !== "Primer Grado") {
             btn.disabled = true;
             btn.classList.add("disabled");
@@ -24,6 +25,7 @@ function mostrarGrados() {
             btn.onclick = () => seleccionarGrado(grado);
             div.appendChild(btn);
         }
+
         container.appendChild(div);
     });
 }
@@ -50,8 +52,10 @@ function seleccionarGrado(grado) {
 function mostrarClases(materia) {
     const materiaNombre = materia.charAt(0).toUpperCase() + materia.slice(1);
     const container = document.getElementById("contenido");
-    container.innerHTML = `<h3>Clases de ${materiaNombre}</h3>`;
 
+    // Solo reemplazamos contenido del grid, mantenemos el título
+    container.innerHTML = `<h3>Clases de ${materiaNombre}</h3>`;
+    
     const gridContainer = document.createElement("div");
     gridContainer.id = "grid-clases";
     container.appendChild(gridContainer);
@@ -83,7 +87,9 @@ function mostrarClases(materia) {
             });
         })
         .catch(err => {
-            container.innerHTML += `<p>Error al cargar las clases de ${materiaNombre}.</p>`;
+            const errorMsg = document.createElement("p");
+            errorMsg.textContent = `Error al cargar las clases de ${materiaNombre}.`;
+            container.appendChild(errorMsg);
             console.error(err);
         });
 }

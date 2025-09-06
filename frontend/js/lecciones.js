@@ -1,3 +1,4 @@
+// Mostrar selección de grados al cargar la página
 function mostrarGradosLecciones() {
     const container = document.getElementById("contenido-lecciones");
     container.innerHTML = "<h3>Seleccione su grado:</h3>";
@@ -12,6 +13,7 @@ function mostrarGradosLecciones() {
         const btn = document.createElement("button");
         btn.textContent = grado;
         btn.className = "grado-btn";
+
         if (grado !== "Primer Grado") {
             btn.disabled = true;
             btn.classList.add("disabled");
@@ -24,10 +26,12 @@ function mostrarGradosLecciones() {
             btn.onclick = () => seleccionarGradoLeccion(grado);
             div.appendChild(btn);
         }
+
         container.appendChild(div);
     });
 }
 
+// Seleccionar materia después de escoger grado
 function seleccionarGradoLeccion(grado) {
     if (grado !== "Primer Grado") {
         alert("Contenido disponible próximamente");
@@ -47,6 +51,7 @@ function seleccionarGradoLeccion(grado) {
     });
 }
 
+// Mostrar lecciones de la materia seleccionada
 function mostrarLecciones(materia) {
     const materiasDisponibles = ["lenguaje", "matematicas"];
     const container = document.getElementById("contenido-lecciones");
@@ -63,8 +68,12 @@ function mostrarLecciones(materia) {
     container.appendChild(gridContainer);
 
     fetch(`https://app-estudio-docker.onrender.com/api/lecciones?materia=${materia}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) throw new Error("Error en la respuesta del servidor");
+            return response.json();
+        })
         .then(data => {
+            gridContainer.innerHTML = "";
             data.forEach(item => {
                 const leccion = item.contenido;
 
@@ -91,13 +100,17 @@ function mostrarLecciones(materia) {
             });
         })
         .catch(err => {
-            container.innerHTML += "<p>Error al cargar las lecciones.</p>";
+            const errorMsg = document.createElement("p");
+            errorMsg.textContent = "Error al cargar las lecciones.";
+            container.appendChild(errorMsg);
             console.error(err);
         });
 }
 
+// Abrir visor EPUB
 function abrirVisorEPUB(url) {
     window.location.href = `libro.html?epub=${url}`;
 }
 
+// Ejecutar al cargar la página
 window.onload = mostrarGradosLecciones;
