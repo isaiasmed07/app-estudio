@@ -50,8 +50,8 @@
     <main class="section-center">
         <h2>Seleccione su grado:</h2>
 
-        <!-- Usamos el id que probablemente espera clases.js y aplicamos el mismo grid -->
-        <section id="contenido" class="grados-container">
+        <!-- IMPORTANTE: usamos el mismo id que en lecciones -->
+        <section id="container" class="grados-container">
             <button class="grado-btn" onclick="mostrarMaterias(1)">Primer Grado</button>
             <button class="grado-btn disabled" disabled>Segundo Grado</button>
             <button class="grado-btn disabled" disabled>Tercer Grado</button>
@@ -69,6 +69,7 @@
     </footer>
 
     <script>
+        // Bloqueo de acceso para usuarios no logueados
         document.addEventListener('DOMContentLoaded', () => {
             const accessToken = localStorage.getItem('accessToken');
             if (!accessToken) {
@@ -77,11 +78,6 @@
                 return;
             }
         });
-
-        // Simulación de función que carga materias (tu clases.js debería manejar esto)
-        function mostrarMaterias(grado) {
-            alert("Mostrando materias para grado " + grado);
-        }
     </script>
 </body>
 </html>

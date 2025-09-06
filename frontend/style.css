@@ -13,6 +13,9 @@ header {
     color: white;
     padding: 2rem;
     text-align: center;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
 header h1 {
@@ -48,8 +51,8 @@ main {
 /* Responsive visor para móviles */
 @media (max-width: 768px) {
     #visor {
-        height: 70vh; /* Reduce el largo del visor en móvil */
-        width: 100%;  /* Ocupar todo el ancho disponible */
+        height: 70vh;
+        width: 100%;
         margin: 10px auto;
         border-radius: 5px;
     }
@@ -76,20 +79,22 @@ main {
     text-decoration: underline;
 }
 
-/* Buttons */
+/* Buttons globales */
 button {
     padding: 0.8rem 1.5rem;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     background-color: #6a11cb;
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
-    transition: background 0.3s ease;
+    font-weight: bold;
+    transition: transform 0.2s ease, background 0.3s ease;
 }
 
 button:hover {
     background-color: #45439e;
+    transform: scale(1.05);
 }
 
 /* Cards */
@@ -107,7 +112,7 @@ button:hover {
     background: white;
     padding: 20px;
     border: 1px solid #ddd;
-    border-radius: 10px;
+    border-radius: 12px;
     width: 250px;
     text-align: center;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -144,17 +149,21 @@ footer p {
     font-size: 0.9rem;
 }
 
-/* Clases Grid */
-#grid-clases {
+/* ========================= */
+/* Grillas para Clases y Lecciones */
+/* ========================= */
+#grid-clases, 
+#grid-lecciones {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 20px;
     padding: 20px;
 }
 
+/* Tarjetas de clases */
 .clase-card {
     background: white;
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 15px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     text-align: center;
@@ -163,7 +172,7 @@ footer p {
 
 .clase-card:hover {
     transform: scale(1.03);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.15);
 }
 
 .clase-card h4 {
@@ -179,17 +188,10 @@ footer p {
     max-width: 360px;
 }
 
-/* Lecciones Grid */
-#grid-lecciones {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-    padding: 20px;
-}
-
+/* Tarjetas de lecciones */
 .leccion-card {
     background: white;
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 15px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     text-align: center;
@@ -208,6 +210,9 @@ footer p {
     grid-template-columns: 1fr;
     gap: 15px;
     margin-top: 20px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 @media (min-width: 600px) {

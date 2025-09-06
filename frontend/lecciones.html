@@ -49,8 +49,8 @@
     <main class="section-center">
         <h2>Seleccione su grado:</h2>
 
-        <!-- OJO: id restaurado para que lecciones.js funcione -->
-        <section id="contenido-lecciones" class="grados-container">
+        <!-- IMPORTANTE: id debe ser "container" porque lecciones.js lo usa -->
+        <section id="container" class="grados-container">
             <button class="grado-btn" onclick="mostrarLecciones(1)">Primer Grado</button>
             <button class="grado-btn disabled" disabled>Segundo Grado</button>
             <button class="grado-btn disabled" disabled>Tercer Grado</button>
@@ -77,12 +77,6 @@
                 return;
             }
         });
-
-        // Simulación de función para cargar lecciones
-        function mostrarLecciones(grado) {
-            // Tu lecciones.js debería sobreescribir esto; este es solo un respaldo.
-            alert("Mostrando lecciones para grado " + grado);
-        }
     </script>
 </body>
 </html>
