@@ -86,4 +86,5 @@ function abrirVisorEPUB(url) {
     window.location.href = `libro.html?epub=${url}`;
 }
 
+// Ejecutar cuando cargue la página
 window.onload = mostrarGradosLecciones;
