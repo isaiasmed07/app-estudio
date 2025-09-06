@@ -39,28 +39,31 @@ function seleccionarGrado(grado) {
     const container = document.getElementById("contenido");
     container.innerHTML = "<h3>Seleccione la materia:</h3>";
 
-    const materias = ["Lenguaje", "Matemáticas"];
+    // Mapear nombres a slugs de API
+    const materias = [
+        { nombre: "Lenguaje", slug: "lenguaje" },
+        { nombre: "Matemáticas", slug: "matematicas" }
+    ];
+
     materias.forEach(materia => {
         const btn = document.createElement("button");
-        btn.textContent = materia;
+        btn.textContent = materia.nombre;
         btn.className = "grado-btn materia-btn";
-        btn.onclick = () => mostrarClases(materia.toLowerCase());
+        btn.onclick = () => mostrarClases(materia.slug);
         container.appendChild(btn);
     });
 }
 
-function mostrarClases(materia) {
-    const materiaNombre = materia.charAt(0).toUpperCase() + materia.slice(1);
+function mostrarClases(materiaSlug) {
+    const materiaNombre = materiaSlug === "matematicas" ? "Matemáticas" : "Lenguaje";
     const container = document.getElementById("contenido");
-
-    // Solo reemplazamos contenido del grid, mantenemos el título
     container.innerHTML = `<h3>Clases de ${materiaNombre}</h3>`;
-    
+
     const gridContainer = document.createElement("div");
     gridContainer.id = "grid-clases";
     container.appendChild(gridContainer);
 
-    fetch(`https://app-estudio-docker.onrender.com/api/listar-videos?materia=${materia}`)
+    fetch(`https://app-estudio-docker.onrender.com/api/listar-videos?materia=${materiaSlug}`)
         .then(response => {
             if (!response.ok) throw new Error("Error en la respuesta del servidor");
             return response.json();

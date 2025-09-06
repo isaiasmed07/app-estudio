@@ -41,33 +41,32 @@ function seleccionarGradoLeccion(grado) {
     const container = document.getElementById("contenido-lecciones");
     container.innerHTML = "<h3>Seleccione la materia:</h3>";
 
-    const materias = ["Lenguaje", "Matemáticas"];
+    const materias = [
+        { nombre: "Lenguaje", slug: "lenguaje" },
+        { nombre: "Matemáticas", slug: "matematicas" }
+    ];
+
     materias.forEach(materia => {
         const btn = document.createElement("button");
-        btn.textContent = materia;
+        btn.textContent = materia.nombre;
         btn.className = "grado-btn materia-btn";
-        btn.onclick = () => mostrarLecciones(materia.toLowerCase());
+        btn.onclick = () => mostrarLecciones(materia.slug);
         container.appendChild(btn);
     });
 }
 
 // Mostrar lecciones de la materia seleccionada
-function mostrarLecciones(materia) {
-    const materiasDisponibles = ["lenguaje", "matematicas"];
+function mostrarLecciones(materiaSlug) {
     const container = document.getElementById("contenido-lecciones");
+    const materiaNombre = materiaSlug === "matematicas" ? "Matemáticas" : "Lenguaje";
 
-    if (!materiasDisponibles.includes(materia)) {
-        container.innerHTML = "<p>Próximamente...</p>";
-        return;
-    }
-
-    container.innerHTML = `<h3>Lecciones de ${materia.charAt(0).toUpperCase() + materia.slice(1)}</h3>`;
+    container.innerHTML = `<h3>Lecciones de ${materiaNombre}</h3>`;
 
     const gridContainer = document.createElement("div");
     gridContainer.id = "grid-lecciones";
     container.appendChild(gridContainer);
 
-    fetch(`https://app-estudio-docker.onrender.com/api/lecciones?materia=${materia}`)
+    fetch(`https://app-estudio-docker.onrender.com/api/lecciones?materia=${materiaSlug}`)
         .then(response => {
             if (!response.ok) throw new Error("Error en la respuesta del servidor");
             return response.json();
