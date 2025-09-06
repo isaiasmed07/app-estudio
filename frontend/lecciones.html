@@ -49,7 +49,7 @@
     <main class="section-center">
         <h2>Seleccione su grado:</h2>
 
-        <!-- OJO: id restaurado para que lecciones.js funcione -->
+        <!-- Se aplica la nueva clase .grados-container y botones actualizados -->
         <section id="contenido-lecciones" class="grados-container">
             <button class="grado-btn" onclick="mostrarLecciones(1)">Primer Grado</button>
             <button class="grado-btn disabled" disabled>Segundo Grado</button>
@@ -68,7 +68,6 @@
     </footer>
 
     <script>
-        // Bloqueo de acceso para usuarios no logueados
         document.addEventListener('DOMContentLoaded', () => {
             const accessToken = localStorage.getItem('accessToken');
             if (!accessToken) {
@@ -78,9 +77,8 @@
             }
         });
 
-        // Simulación de función para cargar lecciones
+        // Función de respaldo (lecciones.js manejará el comportamiento real)
         function mostrarLecciones(grado) {
-            // Tu lecciones.js debería sobreescribir esto; este es solo un respaldo.
             alert("Mostrando lecciones para grado " + grado);
         }
     </script>

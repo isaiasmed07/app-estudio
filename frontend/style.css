@@ -203,54 +203,57 @@ footer p {
 }
 
 /* ========================= */
-/* Grados Buttons (Lecciones/Clases) */
+/* Botones de Grados y Materias Responsivos */
 /* ========================= */
-.grados-container {
+.grados-container, .materias-container {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 15px;
+    padding: 15px;
+    justify-items: center;
     margin-top: 20px;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
 }
 
-@media (min-width: 600px) {
-    .grados-container {
-        grid-template-columns: 1fr 1fr;
-    }
-}
-
-.grado-btn {
+.grado-btn, .materia-btn {
     background: linear-gradient(to right, #6a11cb, #4b3aff);
     color: white;
     font-size: 1rem;
     font-weight: bold;
-    padding: 15px;
+    padding: 12px 20px;
     border: none;
     border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.15);
     cursor: pointer;
-    transition: transform 0.2s, background 0.2s;
+    transition: transform 0.2s, background 0.3s, box-shadow 0.3s;
+    width: 100%;
+    max-width: 250px;
     text-align: center;
+    margin: 5px auto;
+    display: block;
 }
 
-.grado-btn:hover {
+.grado-btn:hover, .materia-btn:hover {
     transform: translateY(-3px);
     background: linear-gradient(to right, #4b3aff, #6a11cb);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
 }
 
-.grado-btn.disabled {
+.grado-btn:active, .materia-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
+
+.grado-btn.disabled, .materia-btn.disabled {
     background: #999;
     cursor: not-allowed;
     opacity: 0.7;
     position: relative;
 }
 
-.grado-btn.disabled::after {
+.grado-btn.disabled::after, .materia-btn.disabled::after {
     content: "Próximamente";
     display: block;
     font-size: 0.8rem;
     color: #fff;
-    margin-top: 5px;
+    margin-top: 3px;
 }

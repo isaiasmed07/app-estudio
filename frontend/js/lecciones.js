@@ -9,10 +9,21 @@ function mostrarGradosLecciones() {
 
     grados.forEach(grado => {
         const div = document.createElement("div");
-        div.innerHTML = `
-            <button onclick="seleccionarGradoLeccion('${grado}')">${grado}</button>
-            <br>${grado === "Primer Grado" ? "" : "<small>Próximamente</small>"}
-        `;
+        const btn = document.createElement("button");
+        btn.textContent = grado;
+        btn.className = "grado-btn";
+        if (grado !== "Primer Grado") {
+            btn.disabled = true;
+            btn.classList.add("disabled");
+            const small = document.createElement("small");
+            small.textContent = "Próximamente";
+            div.appendChild(btn);
+            div.appendChild(document.createElement("br"));
+            div.appendChild(small);
+        } else {
+            btn.onclick = () => seleccionarGradoLeccion(grado);
+            div.appendChild(btn);
+        }
         container.appendChild(div);
     });
 }
@@ -25,14 +36,21 @@ function seleccionarGradoLeccion(grado) {
 
     const container = document.getElementById("contenido-lecciones");
     container.innerHTML = "<h3>Seleccione la materia:</h3>";
-    container.innerHTML += `<button onclick="mostrarLecciones('lenguaje')">Lenguaje</button> `;
-    container.innerHTML += `<button onclick="mostrarLecciones('matematicas')">Matemáticas</button>`;
+
+    const materias = ["Lenguaje", "Matemáticas"];
+    materias.forEach(materia => {
+        const btn = document.createElement("button");
+        btn.textContent = materia;
+        btn.className = "grado-btn materia-btn";
+        btn.onclick = () => mostrarLecciones(materia.toLowerCase());
+        container.appendChild(btn);
+    });
 }
 
 function mostrarLecciones(materia) {
     const materiasDisponibles = ["lenguaje", "matematicas"];
-
     const container = document.getElementById("contenido-lecciones");
+
     if (!materiasDisponibles.includes(materia)) {
         container.innerHTML = "<p>Próximamente...</p>";
         return;
@@ -41,10 +59,8 @@ function mostrarLecciones(materia) {
     container.innerHTML = `<h3>Lecciones de ${materia.charAt(0).toUpperCase() + materia.slice(1)}</h3>`;
 
     const gridContainer = document.createElement("div");
-    gridContainer.style.display = "grid";
-    gridContainer.style.gridTemplateColumns = "repeat(auto-fit, minmax(300px, 1fr))";
-    gridContainer.style.gap = "20px";
-    gridContainer.style.padding = "20px";
+    gridContainer.id = "grid-lecciones";
+    container.appendChild(gridContainer);
 
     fetch(`https://app-estudio-docker.onrender.com/api/lecciones?materia=${materia}`)
         .then(response => response.json())
@@ -73,8 +89,6 @@ function mostrarLecciones(materia) {
 
                 gridContainer.appendChild(card);
             });
-
-            container.appendChild(gridContainer);
         })
         .catch(err => {
             container.innerHTML += "<p>Error al cargar las lecciones.</p>";

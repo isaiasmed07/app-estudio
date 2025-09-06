@@ -50,7 +50,7 @@
     <main class="section-center">
         <h2>Seleccione su grado:</h2>
 
-        <!-- Usamos el id que probablemente espera clases.js y aplicamos el mismo grid -->
+        <!-- Se aplica la nueva clase .grados-container y botones actualizados -->
         <section id="contenido" class="grados-container">
             <button class="grado-btn" onclick="mostrarMaterias(1)">Primer Grado</button>
             <button class="grado-btn disabled" disabled>Segundo Grado</button>
@@ -78,7 +78,7 @@
             }
         });
 
-        // Simulación de función que carga materias (tu clases.js debería manejar esto)
+        // Función de respaldo (clases.js manejará el comportamiento real)
         function mostrarMaterias(grado) {
             alert("Mostrando materias para grado " + grado);
         }

@@ -9,9 +9,21 @@ function mostrarGrados() {
 
     grados.forEach(grado => {
         const div = document.createElement("div");
-        div.innerHTML = `<button onclick="seleccionarGrado('${grado}')">${grado}</button><br>${
-            grado === "Primer Grado" ? "" : "<small>Próximamente</small>"
-        }`;
+        const btn = document.createElement("button");
+        btn.textContent = grado;
+        btn.className = "grado-btn";
+        if (grado !== "Primer Grado") {
+            btn.disabled = true;
+            btn.classList.add("disabled");
+            const small = document.createElement("small");
+            small.textContent = "Próximamente";
+            div.appendChild(btn);
+            div.appendChild(document.createElement("br"));
+            div.appendChild(small);
+        } else {
+            btn.onclick = () => seleccionarGrado(grado);
+            div.appendChild(btn);
+        }
         container.appendChild(div);
     });
 }
@@ -24,8 +36,15 @@ function seleccionarGrado(grado) {
 
     const container = document.getElementById("contenido");
     container.innerHTML = "<h3>Seleccione la materia:</h3>";
-    container.innerHTML += `<button onclick="mostrarClases('lenguaje')">Lenguaje</button> `;
-    container.innerHTML += `<button onclick="mostrarClases('matematicas')">Matemáticas</button>`;
+
+    const materias = ["Lenguaje", "Matemáticas"];
+    materias.forEach(materia => {
+        const btn = document.createElement("button");
+        btn.textContent = materia;
+        btn.className = "grado-btn materia-btn";
+        btn.onclick = () => mostrarClases(materia.toLowerCase());
+        container.appendChild(btn);
+    });
 }
 
 function mostrarClases(materia) {
@@ -37,12 +56,9 @@ function mostrarClases(materia) {
     gridContainer.id = "grid-clases";
     container.appendChild(gridContainer);
 
-    // Llamada al backend para obtener el JSON desde Dropbox (ruta nueva)
     fetch(`https://app-estudio-docker.onrender.com/api/listar-videos?materia=${materia}`)
         .then(response => {
-            if (!response.ok) {
-                throw new Error("Error en la respuesta del servidor");
-            }
+            if (!response.ok) throw new Error("Error en la respuesta del servidor");
             return response.json();
         })
         .then(data => {
@@ -72,5 +88,5 @@ function mostrarClases(materia) {
         });
 }
 
-// Ejecutar cuando cargue la página
+// Ejecutar al cargar la página
 window.onload = mostrarGrados;
