@@ -346,20 +346,10 @@ def eliminar_archivo():
         return jsonify({"error": "Falta la URL"}), 400
 
     try:
-        path = None
+        # Extraer solo el nombre del archivo
+        filename = url.split("/")[-1]
 
-        # Caso 1: URL interna de Vercel App (_vercel/blob/)
-        if "/_vercel/blob/" in url:
-            path = url.split("/_vercel/blob/")[1]
-
-        # Caso 2: URL directa de blob.vercel-storage.com
-        elif "blob.vercel-storage.com/" in url:
-            path = url.split("blob.vercel-storage.com/")[1]
-
-        if not path:
-            return jsonify({"error": f"URL no válida para Vercel Blob: {url}"}), 400
-
-        # 🔑 Token
+        # Token
         vercel_token = (
             os.environ.get("VERCEL_BLOB_TOKEN")
             or os.environ.get("BLOB_READ_WRITE_TOKEN")
@@ -368,8 +358,8 @@ def eliminar_archivo():
         if not vercel_token:
             return jsonify({"error": "Falta VERCEL_BLOB_TOKEN o BLOB_READ_WRITE_TOKEN en variables de entorno"}), 500
 
-        # 👉 URL de eliminación
-        delete_url = f"https://blob.vercel-storage.com/{path}"
+        # Usar la URL de API interna, NO la pública
+        delete_url = f"https://blob.vercel-storage.com/{filename}"
         headers = {"Authorization": f"Bearer {vercel_token}"}
 
         response = requests.delete(delete_url, headers=headers)
@@ -377,7 +367,7 @@ def eliminar_archivo():
         if response.status_code != 200:
             return jsonify({"error": f"No se pudo eliminar el archivo: {response.text}"}), 500
 
-        return jsonify({"message": f"Archivo {path} eliminado correctamente"}), 200
+        return jsonify({"message": f"Archivo {filename} eliminado correctamente"}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
