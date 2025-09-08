@@ -348,10 +348,14 @@ def eliminar_archivo():
     try:
         filename = url.split("/")[-1]
 
-        vercel_token = os.environ.get("VERCEL_BLOB_TOKEN")  # 👉 Crea esta variable en Render dashboard
+        # 🔑 Ahora soporta ambas variables de entorno
+        vercel_token = (
+            os.environ.get("VERCEL_BLOB_TOKEN")
+            or os.environ.get("BLOB_READ_WRITE_TOKEN")
+        )
 
         if not vercel_token:
-            return jsonify({"error": "Falta VERCEL_BLOB_TOKEN en variables de entorno"}), 500
+            return jsonify({"error": "Falta VERCEL_BLOB_TOKEN o BLOB_READ_WRITE_TOKEN en variables de entorno"}), 500
 
         delete_url = f"https://blob.vercel-storage.com/{filename}"
         headers = {
@@ -367,7 +371,6 @@ def eliminar_archivo():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
 
 
 # ---------- AGREGAR VIDEO A JSON EN DROPBOX ----------
