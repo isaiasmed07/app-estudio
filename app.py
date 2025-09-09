@@ -346,42 +346,24 @@ def eliminar_archivo():
         return jsonify({"error": "Falta la URL"}), 400
 
     try:
-        # Validar que la URL tenga el formato esperado
-        if ".public.blob.vercel-storage.com/" not in url:
-            return jsonify({"error": f"URL no válida para Vercel Blob: {url}"}), 400
+        # Extraer scope y nombre de archivo desde la URL pública
+        # Ejemplo: https://mqer957a0yjzxjif.public.blob.vercel-storage.com/Archivo.epub
+        parts = url.split("/")
+        if len(parts) < 4:
+            return jsonify({"error": "URL no válida para Vercel Blob"}), 400
 
-        # Extraer bucket y nombre del archivo
-        parts = url.split(".public.blob.vercel-storage.com/")
-        bucket = parts[0].split("://")[1]   # ejemplo: "mqer957a0yjzxjif"
-        filename = parts[1]                 # ejemplo: "LibroGenerado-xxxx.epub"
+        scope = parts[2].split(".")[0]  # -> mqer957a0yjzxjif
+        filename = parts[-1]            # -> Archivo.epub
 
-        # Obtener token desde variables de entorno
-        vercel_token = (
-            os.environ.get("VERCEL_BLOB_TOKEN")
-            or os.environ.get("BLOB_READ_WRITE_TOKEN")
-        )
-
+        vercel_token = os.environ.get("BLOB_READ_WRITE_TOKEN")
         if not vercel_token:
-            return jsonify({"error": "Falta VERCEL_BLOB_TOKEN o BLOB_READ_WRITE_TOKEN en variables de entorno"}), 500
+            return jsonify({"error": "Falta BLOB_READ_WRITE_TOKEN en variables de entorno"}), 500
 
-        # Construir URL real de eliminación
-        delete_url = f"https://blob.vercel-storage.com/{bucket}/{filename}"
+        # Construir la URL de eliminación correcta
+        delete_url = f"https://blob.vercel-storage.com/{scope}/{filename}"
         headers = {"Authorization": f"Bearer {vercel_token}"}
 
-        # 👀 DEBUG: mostrar en logs qué URL y headers se están usando
-        print("🔎 Eliminando archivo en Vercel Blob...")
-        print("   URL original:", url)
-        print("   Bucket:", bucket)
-        print("   Filename:", filename)
-        print("   DELETE URL:", delete_url)
-        print("   Headers:", headers)
-
-        # Ejecutar DELETE
         response = requests.delete(delete_url, headers=headers)
-
-        # 👀 DEBUG: mostrar respuesta cruda de Vercel
-        print("   Response status:", response.status_code)
-        print("   Response text:", response.text)
 
         if response.status_code != 200:
             return jsonify({"error": f"No se pudo eliminar el archivo: {response.text}"}), 500
@@ -390,7 +372,6 @@ def eliminar_archivo():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 
 # ---------- AGREGAR VIDEO A JSON EN DROPBOX ----------
