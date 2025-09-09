@@ -337,6 +337,7 @@ def listar_archivos():
         return jsonify({"error": str(e)}), 500
 
 
+
 # ---------- ELIMINAR ARCHIVO ----------
 @app.route('/api/eliminar-archivo', methods=['POST'])
 def eliminar_archivo():
