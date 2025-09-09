@@ -337,7 +337,6 @@ def listar_archivos():
         return jsonify({"error": str(e)}), 500
 
 
-
 # ---------- ELIMINAR ARCHIVO ----------
 @app.route('/api/eliminar-archivo', methods=['POST'])
 def eliminar_archivo():
@@ -347,27 +346,30 @@ def eliminar_archivo():
         return jsonify({"error": "Falta la URL"}), 400
 
     try:
-        # Extraer scope y nombre de archivo desde la URL pública
-        # Ejemplo: https://mqer957a0yjzxjif.public.blob.vercel-storage.com/Archivo.epub
-        parts = url.split("/")
-        if len(parts) < 4:
-            return jsonify({"error": "URL no válida para Vercel Blob"}), 400
+        # Ejemplo de entrada:
+        # https://mqer957a0yjzxjif.public.blob.vercel-storage.com/LibroGenerado-xxx.epub
+        if ".public." not in url:
+            return jsonify({"error": "La URL no parece ser de un blob público"}), 400
 
-        scope = parts[2].split(".")[0]  # -> mqer957a0yjzxjif
-        filename = parts[-1]            # -> Archivo.epub
+        # Transformar a URL privada
+        scope = url.split("//")[1].split(".")[0]  # -> mqer957a0yjzxjif
+        filename = url.split("/")[-1]            # -> LibroGenerado-xxx.epub
+        delete_url = f"https://blob.vercel-storage.com/{scope}/{filename}"
 
         vercel_token = os.environ.get("BLOB_READ_WRITE_TOKEN")
         if not vercel_token:
             return jsonify({"error": "Falta BLOB_READ_WRITE_TOKEN en variables de entorno"}), 500
 
-        # Construir la URL de eliminación correcta
-        delete_url = f"https://blob.vercel-storage.com/{scope}/{filename}"
         headers = {"Authorization": f"Bearer {vercel_token}"}
-
         response = requests.delete(delete_url, headers=headers)
 
         if response.status_code != 200:
-            return jsonify({"error": f"No se pudo eliminar el archivo: {response.text}"}), 500
+            return jsonify({
+                "error": f"No se pudo eliminar el archivo",
+                "status": response.status_code,
+                "respuesta": response.text,
+                "url_usada": delete_url
+            }), 500
 
         return jsonify({"message": f"Archivo {filename} eliminado correctamente"}), 200
 
