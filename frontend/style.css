@@ -232,7 +232,7 @@ footer p {
     gap: 20px;
     padding: 20px;
     margin-top: 20px;
-    justify-items: stretch; /* ocupa toda la columna */
+    justify-items: stretch;
     grid-template-columns: repeat(4, 1fr); /* hasta 4 columnas en PC */
 }
 
@@ -285,7 +285,7 @@ footer p {
 /* ========================= */
 @media (max-width: 768px) {
     .grados-container, .materias-container {
-        grid-template-columns: 1fr; /* modo lista */
+        grid-template-columns: 1fr; /* modo lista en móvil */
         gap: 15px;
         padding: 10px;
     }
