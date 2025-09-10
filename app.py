@@ -338,43 +338,181 @@ def listar_archivos():
 
 
 # ---------- ELIMINAR ARCHIVO ----------
-@app.route('/api/eliminar-archivo', methods=['POST'])
-def eliminar_archivo():
-    data = request.get_json()
-    url = data.get('url')
-    if not url:
-        return jsonify({"error": "Falta la URL"}), 400
+# ----------------- ADMIN (crear/listar/eliminar libros y lecciones) -----------------
+from jose import jwt, JWTError
+import requests
 
+AUTH0_DOMAIN = os.environ.get("AUTH0_DOMAIN", "")
+AUTH0_CLIENT_ID = os.environ.get("AUTH0_CLIENT_ID", "")
+
+def is_professor(email: str) -> bool:
+    if not email:
+        return False
+    return email.strip().lower() in PROFESSOR_EMAILS
+
+def _get_rsa_key(token):
+    """Obtiene la clave RSA válida desde JWKS de Auth0 para verificar token."""
+    if not AUTH0_DOMAIN:
+        return None
+    jwks_uri = f"https://{AUTH0_DOMAIN}/.well-known/jwks.json"
+    jwks = requests.get(jwks_uri, timeout=5).json()
+    unverified_header = jwt.get_unverified_header(token)
+    kid = unverified_header.get("kid")
+    for key in jwks.get("keys", []):
+        if key.get("kid") == kid:
+            return {
+                "kty": key.get("kty"),
+                "kid": key.get("kid"),
+                "use": key.get("use"),
+                "n": key.get("n"),
+                "e": key.get("e")
+            }
+    return None
+
+def verify_auth0_token(token: str):
+    """Verifica un id_token de Auth0 y devuelve el payload (o lanza excepción)."""
+    if not token:
+        raise Exception("Token ausente")
+    rsa_key = _get_rsa_key(token)
+    if not rsa_key:
+        raise Exception("No se pudo obtener la clave JWKS")
+    issuer = f"https://{AUTH0_DOMAIN}/"
+    payload = jwt.decode(
+        token,
+        rsa_key,
+        algorithms=["RS256"],
+        audience=AUTH0_CLIENT_ID,
+        issuer=issuer
+    )
+    return payload
+
+def get_email_from_request():
+    """Extrae email del Authorization Bearer id_token (preferido). Si no hay token, intenta extraer 'email' de query/body."""
+    auth = request.headers.get("Authorization", None)
+    if auth and auth.startswith("Bearer "):
+        token = auth.split(" ", 1)[1]
+        try:
+            payload = verify_auth0_token(token)
+            return payload.get("email")
+        except Exception as e:
+            # no detener; permitimos que el caller maneje el fallo
+            print("[auth0 verify error]", str(e))
+            return None
+    # fallback (menos seguro): email en query o body
+    email = (request.args.get("email") or (request.json.get("email") if request.is_json else None))
+    return email
+
+# Ruta para agregar (crear) libro o lección
+@app.route('/api/admin/agregar', methods=['POST'])
+def admin_agregar():
     try:
-        # Ejemplo de entrada:
-        # https://mqer957a0yjzxjif.public.blob.vercel-storage.com/LibroGenerado-xxx.epub
-        if ".public." not in url:
-            return jsonify({"error": "La URL no parece ser de un blob público"}), 400
+        email = get_email_from_request()
+        if not is_professor(email):
+            return jsonify({"error": "Acceso restringido. Solo profesores."}), 403
 
-        # Transformar a URL privada
-        scope = url.split("//")[1].split(".")[0]  # -> mqer957a0yjzxjif
-        filename = url.split("/")[-1]            # -> LibroGenerado-xxx.epub
-        delete_url = f"https://blob.vercel-storage.com/{scope}/{filename}"
+        data = request.get_json(force=True)
+        tipo = (data.get("tipo") or "").strip().lower()
+        if tipo not in ("libros", "lecciones"):
+            return jsonify({"error": "Tipo inválido. 'libros' o 'lecciones'."}), 400
 
-        vercel_token = os.environ.get("BLOB_READ_WRITE_TOKEN")
-        if not vercel_token:
-            return jsonify({"error": "Falta BLOB_READ_WRITE_TOKEN en variables de entorno"}), 500
+        titulo = (data.get("titulo") or "").strip()
+        descripcion = (data.get("descripcion") or "").strip()
+        materia = (data.get("materia") or "").strip().lower()
+        contenido_html = (data.get("contenido_html") or "").strip()
+        grado = (data.get("grado") or "").strip()
 
-        headers = {"Authorization": f"Bearer {vercel_token}"}
-        response = requests.delete(delete_url, headers=headers)
+        if not titulo or not materia or not contenido_html:
+            return jsonify({"error": "Faltan campos obligatorios: titulo, materia, contenido_html"}), 400
 
-        if response.status_code != 200:
-            return jsonify({
-                "error": f"No se pudo eliminar el archivo",
-                "status": response.status_code,
-                "respuesta": response.text,
-                "url_usada": delete_url
-            }), 500
+        db = firestore.client()
+        if tipo == "libros":
+            # Para libros también validamos grado
+            if not grado:
+                return jsonify({"error": "Para 'libros' es obligatorio el campo 'grado'."}), 400
+            doc_data = {
+                "titulo": titulo,
+                "descripcion": descripcion,
+                "grado": grado,
+                "materia": materia,
+                "contenido_html": contenido_html
+            }
+            doc_ref = db.collection("Libros").document()
+            doc_ref.set(doc_data)
+            return jsonify({"message": "Libro creado", "id": doc_ref.id}), 200
 
-        return jsonify({"message": f"Archivo {filename} eliminado correctamente"}), 200
+        else:  # lecciones
+            doc_data = {
+                "titulo": titulo,
+                "descripcion": descripcion,
+                "materia": materia,
+                "contenido_html": contenido_html
+            }
+            doc_ref = db.collection("Lecciones").document()
+            doc_ref.set(doc_data)
+            return jsonify({"message": "Lección creada", "id": doc_ref.id}), 200
 
     except Exception as e:
+        print("[admin_agregar] Exception:", str(e))
         return jsonify({"error": str(e)}), 500
+
+# Ruta para listar (devuelve id + titulo)
+@app.route('/api/admin/listar', methods=['GET'])
+def admin_listar():
+    try:
+        email = get_email_from_request()
+        if not is_professor(email):
+            return jsonify({"error": "Acceso restringido. Solo profesores."}), 403
+
+        tipo = (request.args.get("tipo") or "libros").strip().lower()
+        if tipo not in ("libros", "lecciones"):
+            return jsonify({"error": "Tipo inválido. 'libros' o 'lecciones'."}), 400
+
+        db = firestore.client()
+        col_name = "Libros" if tipo == "libros" else "Lecciones"
+        docs = db.collection(col_name).stream()
+
+        salida = []
+        for d in docs:
+            contenido = d.to_dict() or {}
+            salida.append({
+                "id": d.id,
+                "titulo": contenido.get("titulo", "(sin titulo)"),
+                "metadata": contenido  # opcional, para mostrar más info en frontend
+            })
+
+        return jsonify(salida), 200
+
+    except Exception as e:
+        print("[admin_listar] Exception:", str(e))
+        return jsonify({"error": str(e)}), 500
+
+# Ruta para eliminar por id
+@app.route('/api/admin/eliminar', methods=['DELETE'])
+def admin_eliminar():
+    try:
+        email = get_email_from_request()
+        if not is_professor(email):
+            return jsonify({"error": "Acceso restringido. Solo profesores."}), 403
+
+        data = request.get_json(force=True)
+        tipo = (data.get("tipo") or "").strip().lower()
+        doc_id = (data.get("id") or "").strip()
+        if tipo not in ("libros", "lecciones") or not doc_id:
+            return jsonify({"error": "Faltan campos: tipo (libros|lecciones), id"}), 400
+
+        db = firestore.client()
+        col_name = "Libros" if tipo == "libros" else "Lecciones"
+        doc_ref = db.collection(col_name).document(doc_id)
+        if not doc_ref.get().exists:
+            return jsonify({"error": "Documento no encontrado"}), 404
+
+        doc_ref.delete()
+        return jsonify({"message": f"Documento {doc_id} eliminado de {col_name}"}), 200
+
+    except Exception as e:
+        print("[admin_eliminar] Exception:", str(e))
+        return jsonify({"error": str(e)}), 500
+
 
 
 # ---------- AGREGAR VIDEO A JSON EN DROPBOX ----------

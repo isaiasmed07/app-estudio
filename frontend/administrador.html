@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Administrador - Plataforma Educativa</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background:#f7f7fb; }
+    .navbar { display:flex; gap:12px; background: linear-gradient(to right,#4b3aff,#6a11cb); padding:12px; color:#fff; border-radius:8px; }
+    .navbar a { color:white; text-decoration:none; font-weight:600; }
+    .container { max-width: 980px; margin: 20px auto; background:white; padding:16px; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.06); }
+    .row { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
+    label { display:block; font-weight:600; margin-bottom:6px; }
+    input, select, textarea { width:100%; padding:8px; border-radius:6px; border:1px solid #ddd; }
+    button { padding:10px 14px; background:#6a11cb; color:white; border:none; border-radius:6px; cursor:pointer; }
+    table { width:100%; border-collapse:collapse; margin-top:12px; }
+    th, td { padding:8px; border-bottom:1px solid #eee; text-align:left; }
+    .small { font-size:0.9rem; color:#666; }
+    .danger { background:#e74c3c; }
+    .success { background:#2ecc71; }
+    .msg { margin:8px 0; padding:8px; border-radius:6px; }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <a href="index.html">🏠 Home</a>
+    <a href="books.html">📚 Libros</a>
+    <a href="lecciones.html">📝 Lecciones</a>
+    <a href="clases.html">🧑‍🏫 Clases</a>
+    <div style="flex:1"></div>
+    <div class="small">Panel administrador</div>
+  </div>
+
+  <div class="container">
+    <h2>Administrador — Crear / Listar / Eliminar</h2>
+
+    <section id="crear">
+      <h3>Crear elemento</h3>
+      <div class="row">
+        <div style="flex:1">
+          <label>Tipo</label>
+          <select id="tipo">
+            <option value="libros">Libros</option>
+            <option value="lecciones">Lecciones</option>
+          </select>
+        </div>
+        <div style="width:140px">
+          <label>Grado</label>
+          <select id="grado">
+            <option value="">--</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+          </select>
+          <div class="small">Sólo primer grado funcional</div>
+        </div>
+        <div style="width:200px">
+          <label>Materia</label>
+          <select id="materia">
+            <option value="lenguaje">Lenguaje</option>
+            <option value="matematicas">Matemáticas</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label>Título</label>
+        <input id="titulo" type="text" placeholder="Título" />
+      </div>
+      <div>
+        <label>Descripción</label>
+        <textarea id="descripcion" rows="3" placeholder="Descripción"></textarea>
+      </div>
+      <div>
+        <label>URL (contenido_html)</label>
+        <input id="contenido_html" type="url" placeholder="https://...epub" />
+      </div>
+
+      <div style="margin-top:10px;">
+        <button id="btnCrear">Crear</button>
+        <span id="crearMsg" class="msg" style="display:none;"></span>
+      </div>
+    </section>
+
+    <hr/>
+
+    <section id="listar">
+      <h3>Listar / Eliminar</h3>
+      <div class="row">
+        <div style="flex:1">
+          <label>Tipo a listar</label>
+          <select id="listarTipo">
+            <option value="libros">Libros</option>
+            <option value="lecciones">Lecciones</option>
+          </select>
+        </div>
+        <div style="width:120px; align-self:flex-end">
+          <button id="btnListar">Listar</button>
+        </div>
+      </div>
+
+      <div id="listContainer">
+        <!-- tabla se inyecta acá -->
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const API_BASE = "https://app-estudio-docker.onrender.com/api";
+    const idToken = localStorage.getItem("idToken");
+
+    function showMsg(el, text, ok=true) {
+      el.style.display = "inline-block";
+      el.textContent = text;
+      el.style.background = ok ? "#e6ffef" : "#ffe6e6";
+      el.style.color = ok ? "#056a2f" : "#8a1f1f";
+      setTimeout(()=>{ el.style.display = "none"; }, 6000);
+    }
+
+    // control de acceso local (redirige si no autenticado)
+    document.addEventListener("DOMContentLoaded", () => {
+      if (!idToken) {
+        alert("Debes iniciar sesión (idToken no encontrado).");
+        window.location.href = "index.html";
+        return;
+      }
+      // inicial: listar libros
+      document.getElementById("listarTipo").value = "libros";
+      listar();
+    });
+
+    // Crear
+    document.getElementById("btnCrear").addEventListener("click", async () => {
+      const tipo = document.getElementById("tipo").value;
+      const grado = document.getElementById("grado").value;
+      const materia = document.getElementById("materia").value;
+      const titulo = document.getElementById("titulo").value.trim();
+      const descripcion = document.getElementById("descripcion").value.trim();
+      const contenido_html = document.getElementById("contenido_html").value.trim();
+      const msgEl = document.getElementById("crearMsg");
+
+      if (!titulo || !materia || !contenido_html) {
+        showMsg(msgEl, "Faltan campos obligatorios.", false);
+        return;
+      }
+      if (tipo === "libros" && !grado) {
+        showMsg(msgEl, "Para libros es obligatorio el grado.", false);
+        return;
+      }
+      // sólo primer grado funcional
+      if (grado && grado !== "1") {
+        showMsg(msgEl, "Solo PRIMER GRADO está habilitado.", false);
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/admin/agregar`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + idToken
+          },
+          body: JSON.stringify({ tipo, grado, materia, titulo, descripcion, contenido_html })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showMsg(msgEl, "Creado OK: " + data.id, true);
+          // limpiar
+          document.getElementById("titulo").value = "";
+          document.getElementById("descripcion").value = "";
+          document.getElementById("contenido_html").value = "";
+          listar(); // refrescar listado
+        } else {
+          showMsg(msgEl, (data.error || JSON.stringify(data)), false);
+        }
+      } catch (err) {
+        showMsg(msgEl, "Error de conexión.", false);
+        console.error(err);
+      }
+    });
+
+    // Listar
+    document.getElementById("btnListar").addEventListener("click", listar);
+    async function listar() {
+      const tipo = document.getElementById("listarTipo").value;
+      const cont = document.getElementById("listContainer");
+      cont.innerHTML = "<p>Cargando...</p>";
+      try {
+        const res = await fetch(`${API_BASE}/admin/listar?tipo=${tipo}`, {
+          headers: { "Authorization": "Bearer " + idToken }
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          cont.innerHTML = `<p style="color:red;">${data.error || JSON.stringify(data)}</p>`;
+          return;
+        }
+        if (!Array.isArray(data) || data.length === 0) {
+          cont.innerHTML = "<p>No hay documentos.</p>";
+          return;
+        }
+        let html = `<table><thead><tr><th>ID</th><th>Título</th><th>Acciones</th></tr></thead><tbody>`;
+        data.forEach(item => {
+          html += `<tr id="row-${item.id}"><td>${item.id}</td><td>${item.titulo}</td>
+                    <td><button onclick="eliminar('${tipo}','${item.id}')" style="background:#e74c3c;color:#fff;border:none;padding:6px;border-radius:6px;cursor:pointer;">Eliminar</button></td></tr>`;
+        });
+        html += `</tbody></table>`;
+        cont.innerHTML = html;
+      } catch (err) {
+        cont.innerHTML = "<p style='color:red;'>Error de conexión</p>";
+        console.error(err);
+      }
+    }
+
+    // Eliminar
+    async function eliminar(tipo, id) {
+      if (!confirm("¿Seguro que desea eliminar este documento?")) return;
+      try {
+        const res = await fetch(`${API_BASE}/admin/eliminar`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + idToken },
+          body: JSON.stringify({ tipo, id })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert("Eliminado OK");
+          const row = document.getElementById("row-" + id);
+          if (row) row.remove();
+        } else {
+          alert("Error: " + (data.error || JSON.stringify(data)));
+        }
+      } catch (err) {
+        alert("Error de conexión al eliminar.");
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>
