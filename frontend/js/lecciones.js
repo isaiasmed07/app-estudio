@@ -9,7 +9,6 @@ function mostrarGradosLecciones() {
     ];
 
     grados.forEach(grado => {
-        const div = document.createElement("div");
         const btn = document.createElement("button");
         btn.textContent = grado;
         btn.className = "grado-btn";
@@ -17,21 +16,14 @@ function mostrarGradosLecciones() {
         if (grado !== "Primer Grado") {
             btn.disabled = true;
             btn.classList.add("disabled");
-            const small = document.createElement("small");
-            small.textContent = "Próximamente";
-            div.appendChild(btn);
-            div.appendChild(document.createElement("br"));
-            div.appendChild(small);
         } else {
             btn.onclick = () => seleccionarGradoLeccion(grado);
-            div.appendChild(btn);
         }
 
-        container.appendChild(div);
+        container.appendChild(btn);
     });
 }
 
-// Seleccionar materia después de escoger grado
 function seleccionarGradoLeccion(grado) {
     if (grado !== "Primer Grado") {
         alert("Contenido disponible próximamente");
@@ -55,7 +47,6 @@ function seleccionarGradoLeccion(grado) {
     });
 }
 
-// Mostrar lecciones de la materia seleccionada
 function mostrarLecciones(materiaSlug) {
     const container = document.getElementById("contenido-lecciones");
     const materiaNombre = materiaSlug === "matematicas" ? "Matemáticas" : "Lenguaje";

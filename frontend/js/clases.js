@@ -8,7 +8,6 @@ function mostrarGrados() {
     container.innerHTML = "<h3>Seleccione su grado:</h3>";
 
     grados.forEach(grado => {
-        const div = document.createElement("div");
         const btn = document.createElement("button");
         btn.textContent = grado;
         btn.className = "grado-btn";
@@ -16,17 +15,11 @@ function mostrarGrados() {
         if (grado !== "Primer Grado") {
             btn.disabled = true;
             btn.classList.add("disabled");
-            const small = document.createElement("small");
-            small.textContent = "Próximamente";
-            div.appendChild(btn);
-            div.appendChild(document.createElement("br"));
-            div.appendChild(small);
         } else {
             btn.onclick = () => seleccionarGrado(grado);
-            div.appendChild(btn);
         }
 
-        container.appendChild(div);
+        container.appendChild(btn);
     });
 }
 
@@ -39,7 +32,6 @@ function seleccionarGrado(grado) {
     const container = document.getElementById("contenido");
     container.innerHTML = "<h3>Seleccione la materia:</h3>";
 
-    // Mapear nombres a slugs de API
     const materias = [
         { nombre: "Lenguaje", slug: "lenguaje" },
         { nombre: "Matemáticas", slug: "matematicas" }
