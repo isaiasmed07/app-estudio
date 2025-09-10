@@ -361,22 +361,10 @@ db = firestore.client()
 AUTH0_DOMAIN = os.environ.get("AUTH0_DOMAIN", "")
 AUTH0_CLIENT_ID = os.environ.get("AUTH0_CLIENT_ID", "")
 
-# ---------- CONFIG ADMIN / AUTH0 ----------
-AUTH0_DOMAIN = os.environ.get("AUTH0_DOMAIN", "")
-AUTH0_CLIENT_ID = os.environ.get("AUTH0_CLIENT_ID", "")
-
-# Lista blanca de profesores desde variables de entorno (Render)
-PROFESSOR_EMAILS = {
-    e.strip().lower() for e in (os.getenv("PROFESSOR_EMAILS", "").split(","))
-    if e.strip()
-}
-
 def is_professor(email: str) -> bool:
-    """Valida si un email está autorizado como profesor."""
     if not email:
         return False
     return email.strip().lower() in PROFESSOR_EMAILS
-
 
 def _get_rsa_key(token):
     """Obtiene la clave RSA válida desde JWKS de Auth0 para verificar token."""
@@ -576,9 +564,11 @@ CORS(app, resources={
     r"/api/*": {
         "origins": ["https://app-estudio.vercel.app"],
         "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type"]
+        "allow_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": True
     }
 })
+
 
 @app.before_request
 def handle_preflight():
