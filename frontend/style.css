@@ -233,7 +233,7 @@ footer p {
     padding: 20px;
     margin-top: 20px;
     justify-items: stretch; /* ocupa toda la columna */
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(4, 1fr); /* hasta 4 columnas en PC */
 }
 
 .grado-btn, .materia-btn {
@@ -285,7 +285,7 @@ footer p {
 /* ========================= */
 @media (max-width: 768px) {
     .grados-container, .materias-container {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr; /* modo lista */
         gap: 15px;
         padding: 10px;
     }
