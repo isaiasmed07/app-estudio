@@ -512,6 +512,28 @@ def admin_eliminar():
     except Exception as e:
         print("[admin_eliminar] Exception:", str(e))
         return jsonify({"error": str(e)}), 500
+    
+
+# ---------- LISTAR DOCUMENTOS ----------
+@app.route('/admin/listar', methods=['GET'])
+def listar_documentos():
+    coleccion = request.args.get("coleccion")
+    if not coleccion:
+        return jsonify({"error": "Falta el parámetro 'coleccion'"}), 400
+
+    try:
+        docs = db.collection(coleccion).stream()
+        resultados = []
+        for doc in docs:
+            data = doc.to_dict()
+            data["id"] = doc.id  # incluir el ID del documento
+            resultados.append(data)
+
+        return jsonify(resultados), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 
 
