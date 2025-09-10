@@ -4,204 +4,117 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Administrador</title>
-  <link rel="stylesheet" href="style.css">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f9f9f9;
-      margin: 0;
-      padding: 0;
-    }
-    .navbar {
-      display: flex;
-      gap: 15px;
-      background: linear-gradient(to right, #4b3aff, #6a11cb);
-      padding: 12px 20px;
-    }
-    .navbar a {
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    .container {
-      max-width: 900px;
-      margin: 20px auto;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
-    }
-    h1 {
-      color: #333;
-      margin-bottom: 20px;
-    }
-    form {
-      margin-bottom: 30px;
-    }
-    label {
-      font-weight: bold;
-      display: block;
-      margin-top: 10px;
-    }
-    input, select, textarea {
-      width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-    }
-    button {
-      margin-top: 15px;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 6px;
-      background: #4b3aff;
-      color: white;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    button:hover {
-      background: #372ddf;
-    }
-    .listado {
-      margin-top: 20px;
-    }
-    .card {
-      padding: 15px;
-      border: 1px solid #eee;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #fafafa;
-    }
-    .card h3 {
-      margin: 0;
-      font-size: 18px;
-    }
-    .card small {
-      display: block;
-      color: #555;
-    }
-    .eliminar-btn {
-      background: crimson;
-      padding: 6px 12px;
-    }
-    .eliminar-btn:hover {
-      background: darkred;
-    }
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f4f4f9; }
+    h1 { color: #6a11cb; }
+    form, .acciones { margin-bottom: 20px; padding: 15px; background: white; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    label { display: block; margin-top: 10px; font-weight: bold; }
+    input, select, textarea { width: 100%; padding: 8px; margin-top: 5px; border-radius: 5px; border: 1px solid #ccc; }
+    button { margin-top: 15px; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; background: #6a11cb; color: white; font-size: 1rem; }
+    button:hover { background: #4b3aff; }
+    .resultado { margin-top: 20px; white-space: pre-wrap; }
   </style>
 </head>
 <body>
-  <div class="navbar">
-    <a href="index.html">🏠 Home</a>
-    <a href="books.html">📚 Libros</a>
-    <a href="lecciones.html">📝 Lecciones</a>
-    <a href="clases.html">🧑‍🏫 Clases</a>
-    <a href="administrador.html">⚙️ Administrador</a>
+  <h1>📚 Administrador</h1>
+
+  <!-- Formulario crear -->
+  <form id="form-admin">
+    <label for="tipo">Tipo:</label>
+    <select id="tipo">
+      <option value="libros">Libro</option>
+      <option value="lecciones">Lección</option>
+    </select>
+
+    <label for="grado">Grado (solo para libros):</label>
+    <select id="grado">
+      <option value="">-- Selecciona grado --</option>
+      <option value="1">1°</option>
+      <option value="2" disabled>2° (próximamente)</option>
+      <!-- ... hasta noveno -->
+    </select>
+
+    <label for="materia">Materia:</label>
+    <select id="materia">
+      <option value="lenguaje">Lenguaje</option>
+      <option value="matematicas">Matemáticas</option>
+    </select>
+
+    <label for="titulo">Título:</label>
+    <input type="text" id="titulo" required>
+
+    <label for="descripcion">Descripción:</label>
+    <textarea id="descripcion"></textarea>
+
+    <label for="contenido_html">URL:</label>
+    <input type="text" id="contenido_html" required>
+
+    <button type="submit">✅ Crear</button>
+  </form>
+
+  <!-- Acciones -->
+  <div class="acciones">
+    <button onclick="cargarListado('libros')">📖 Ver Libros</button>
+    <button onclick="cargarListado('lecciones')">📝 Ver Lecciones</button>
   </div>
 
-  <div class="container">
-    <h1>⚙️ Panel de Administración</h1>
-
-    <!-- Formulario de creación -->
-    <form id="form-admin">
-      <label for="tipo">Selecciona tipo:</label>
-      <select id="tipo" name="tipo" required>
-        <option value="">-- Selecciona --</option>
-        <option value="libros">📚 Libro</option>
-        <option value="lecciones">📝 Lección</option>
-      </select>
-
-      <label for="grado">Grado:</label>
-      <select id="grado" name="grado">
-        <option value="1">1° Grado (habilitado)</option>
-        <option value="" disabled>2° - 9° (Próximamente)</option>
-      </select>
-
-      <label for="materia">Materia:</label>
-      <select id="materia" name="materia" required>
-        <option value="lenguaje">Lenguaje</option>
-        <option value="matematicas">Matemáticas</option>
-      </select>
-
-      <label for="titulo">Título:</label>
-      <input type="text" id="titulo" name="titulo" required>
-
-      <label for="descripcion">Descripción:</label>
-      <textarea id="descripcion" name="descripcion"></textarea>
-
-      <label for="contenido_html">URL (contenido_html):</label>
-      <input type="url" id="contenido_html" name="contenido_html" required>
-
-      <button type="submit">➕ Crear</button>
-    </form>
-
-    <!-- Sección de listado -->
-    <h2>📋 Documentos existentes</h2>
-    <div>
-      <button onclick="cargarListado('libros')">📚 Ver Libros</button>
-      <button onclick="cargarListado('lecciones')">📝 Ver Lecciones</button>
-    </div>
-
-    <div id="listado" class="listado"></div>
-  </div>
+  <div class="resultado" id="resultado"></div>
 
   <script>
     const API_BASE = "https://app-estudio-docker.onrender.com/api/admin";
 
+    // Verificación de login
+    document.addEventListener("DOMContentLoaded", () => {
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        alert("Debes iniciar sesión como profesor para acceder.");
+        window.location.href = "index.html";
+      }
+    });
+
+    // Crear libro/lección
     document.getElementById("form-admin").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const formData = {
+      const data = {
         tipo: document.getElementById("tipo").value,
         grado: document.getElementById("grado").value,
         materia: document.getElementById("materia").value,
         titulo: document.getElementById("titulo").value,
         descripcion: document.getElementById("descripcion").value,
-        contenido_html: document.getElementById("contenido_html").value
+        contenido_html: document.getElementById("contenido_html").value,
       };
 
       const res = await fetch(`${API_BASE}/agregar`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("accessToken")}` 
+        },
+        body: JSON.stringify(data)
       });
-      const data = await res.json();
-      alert(data.message || JSON.stringify(data));
+
+      const result = await res.json();
+      document.getElementById("resultado").innerText = JSON.stringify(result, null, 2);
     });
 
+    // Listar libros o lecciones
     async function cargarListado(tipo) {
-      const res = await fetch(`${API_BASE}/listar?tipo=${tipo}`);
+      const res = await fetch(`${API_BASE}/listar?tipo=${tipo}`, {
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("accessToken")}`
+        }
+      });
       const docs = await res.json();
-      const cont = document.getElementById("listado");
-      cont.innerHTML = "";
-      docs.forEach(doc => {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `
-          <div>
-            <h3>${doc.titulo}</h3>
-            <small>ID: ${doc.id}</small>
-            <small>Materia: ${doc.metadata.materia || "-"}</small>
-            ${doc.metadata.grado ? `<small>Grado: ${doc.metadata.grado}</small>` : ""}
-          </div>
-          <button class="eliminar-btn" onclick="eliminarDoc('${tipo}', '${doc.id}')">❌ Eliminar</button>
-        `;
-        cont.appendChild(card);
-      });
-    }
+      if (!Array.isArray(docs)) {
+        document.getElementById("resultado").innerText = "Error: " + JSON.stringify(docs);
+        return;
+      }
 
-    async function eliminarDoc(tipo, id) {
-      if (!confirm("¿Seguro que deseas eliminar este documento?")) return;
-      const res = await fetch(`${API_BASE}/eliminar`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tipo, id })
+      let html = `=== ${tipo.toUpperCase()} ===\n\n`;
+      docs.forEach(d => {
+        html += `ID: ${d.id}\nTítulo: ${d.titulo}\n---\n`;
       });
-      const data = await res.json();
-      alert(data.message || JSON.stringify(data));
-      cargarListado(tipo);
+      document.getElementById("resultado").innerText = html;
     }
   </script>
 </body>
