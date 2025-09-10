@@ -341,6 +341,22 @@ def listar_archivos():
 # ----------------- ADMIN (crear/listar/eliminar libros y lecciones) -----------------
 from jose import jwt, JWTError
 import requests
+import os, json
+
+import firebase_admin
+from firebase_admin import credentials, firestore
+
+# Inicializar Firebase solo una vez usando variable de entorno
+if not firebase_admin._apps:
+    firebase_credentials = os.environ.get("FIREBASE_CREDENTIALS")
+    if not firebase_credentials:
+        raise Exception("❌ Falta la variable de entorno FIREBASE_CREDENTIALS")
+
+    cred_dict = json.loads(firebase_credentials)  # convertir string JSON -> dict
+    cred = credentials.Certificate(cred_dict)
+    firebase_admin.initialize_app(cred)
+
+db = firestore.client()
 
 AUTH0_DOMAIN = os.environ.get("AUTH0_DOMAIN", "")
 AUTH0_CLIENT_ID = os.environ.get("AUTH0_CLIENT_ID", "")
@@ -387,7 +403,8 @@ def verify_auth0_token(token: str):
     return payload
 
 def get_email_from_request():
-    """Extrae email del Authorization Bearer id_token (preferido). Si no hay token, intenta extraer 'email' de query/body."""
+    """Extrae email del Authorization Bearer id_token (preferido). 
+       Si no hay token, intenta extraer 'email' de query/body."""
     auth = request.headers.get("Authorization", None)
     if auth and auth.startswith("Bearer "):
         token = auth.split(" ", 1)[1]
@@ -395,10 +412,8 @@ def get_email_from_request():
             payload = verify_auth0_token(token)
             return payload.get("email")
         except Exception as e:
-            # no detener; permitimos que el caller maneje el fallo
             print("[auth0 verify error]", str(e))
             return None
-    # fallback (menos seguro): email en query o body
     email = (request.args.get("email") or (request.json.get("email") if request.is_json else None))
     return email
 
@@ -424,9 +439,7 @@ def admin_agregar():
         if not titulo or not materia or not contenido_html:
             return jsonify({"error": "Faltan campos obligatorios: titulo, materia, contenido_html"}), 400
 
-        db = firestore.client()
         if tipo == "libros":
-            # Para libros también validamos grado
             if not grado:
                 return jsonify({"error": "Para 'libros' es obligatorio el campo 'grado'."}), 400
             doc_data = {
@@ -467,7 +480,6 @@ def admin_listar():
         if tipo not in ("libros", "lecciones"):
             return jsonify({"error": "Tipo inválido. 'libros' o 'lecciones'."}), 400
 
-        db = firestore.client()
         col_name = "Libros" if tipo == "libros" else "Lecciones"
         docs = db.collection(col_name).stream()
 
@@ -477,7 +489,7 @@ def admin_listar():
             salida.append({
                 "id": d.id,
                 "titulo": contenido.get("titulo", "(sin titulo)"),
-                "metadata": contenido  # opcional, para mostrar más info en frontend
+                "metadata": contenido
             })
 
         return jsonify(salida), 200
@@ -500,7 +512,6 @@ def admin_eliminar():
         if tipo not in ("libros", "lecciones") or not doc_id:
             return jsonify({"error": "Faltan campos: tipo (libros|lecciones), id"}), 400
 
-        db = firestore.client()
         col_name = "Libros" if tipo == "libros" else "Lecciones"
         doc_ref = db.collection(col_name).document(doc_id)
         if not doc_ref.get().exists:
@@ -512,7 +523,9 @@ def admin_eliminar():
     except Exception as e:
         print("[admin_eliminar] Exception:", str(e))
         return jsonify({"error": str(e)}), 500
-    
+
+
+
 
 # ---------- LISTAR DOCUMENTOS ----------
 @app.route('/admin/listar', methods=['GET'])
