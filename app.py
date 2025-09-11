@@ -417,22 +417,24 @@ def verify_auth0_token(token: str):
 def get_email_from_request():
     """Extrae email del Authorization Bearer id_token (preferido). 
        Si no hay token, intenta extraer 'email' de query/body."""
+
     auth = request.headers.get("Authorization", None)
     if auth and auth.startswith("Bearer "):
         token = auth.split(" ", 1)[1]
         try:
             payload = verify_auth0_token(token)
             email = payload.get("email")
-            print(f"[auth0 verify success] Email extraído del token: {email}")
+            print(f"[✅ auth0 verify success] Email extraído del token: {email}")
             return email
         except Exception as e:
-            print("[auth0 verify error]", str(e))
+            print(f"[❌ auth0 verify error] {str(e)}")
             return None
 
-    # fallback (menos seguro)
+    # fallback (menos seguro, solo para debug)
     email = (request.args.get("email") or (request.json.get("email") if request.is_json else None))
-    print(f"[fallback email] Email recibido desde query/body: {email}")
+    print(f"[⚠️ fallback email] Usando email desde query/body: {email}")
     return email
+
 
 
 # Ruta para agregar (crear) libro o lección
