@@ -67,14 +67,19 @@
   <script>
     const API_BASE = "https://app-estudio-docker.onrender.com/api/admin";
 
-    // Verificación de login
+    // 🔹 Verificación de login usando idToken
     document.addEventListener("DOMContentLoaded", () => {
-      const token = localStorage.getItem("accessToken");
-      if (!token) {
+      const idToken = localStorage.getItem("idToken");
+      if (!idToken) {
         alert("Debes iniciar sesión como profesor para acceder.");
         window.location.href = "index.html";
       }
     });
+
+    // 🔹 Función para obtener el token correcto para el backend
+    function getAuthToken() {
+      return localStorage.getItem("idToken"); // usamos el id_token, no el access_token
+    }
 
     // Crear libro/lección
     document.getElementById("form-admin").addEventListener("submit", async (e) => {
@@ -94,7 +99,7 @@
           method: "POST",
           headers: { 
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${localStorage.getItem("accessToken")}` 
+            "Authorization": `Bearer ${getAuthToken()}` 
           },
           body: JSON.stringify(data)
         });
@@ -115,7 +120,7 @@
         console.log(`➡ Solicitando listado de ${tipo}`);
         const res = await fetch(`${API_BASE}/listar?tipo=${tipo}`, {
           headers: {
-            "Authorization": `Bearer ${localStorage.getItem("accessToken")}`
+            "Authorization": `Bearer ${getAuthToken()}`
           }
         });
         const docs = await res.json();
@@ -156,7 +161,7 @@
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${localStorage.getItem("accessToken")}`
+            "Authorization": `Bearer ${getAuthToken()}`
           },
           body: JSON.stringify({ tipo, id })
         });
