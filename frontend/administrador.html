@@ -10,9 +10,14 @@
     form, .acciones { margin-bottom: 20px; padding: 15px; background: white; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
     label { display: block; margin-top: 10px; font-weight: bold; }
     input, select, textarea { width: 100%; padding: 8px; margin-top: 5px; border-radius: 5px; border: 1px solid #ccc; }
-    button { margin-top: 15px; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; background: #6a11cb; color: white; font-size: 1rem; }
+    button { margin-top: 10px; padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; background: #6a11cb; color: white; font-size: 0.9rem; }
     button:hover { background: #4b3aff; }
-    .resultado { margin-top: 20px; white-space: pre-wrap; }
+    .resultado { margin-top: 20px; }
+    .item { background: #fff; padding: 10px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+    .item h3 { margin: 0; font-size: 1rem; color: #333; }
+    .item small { color: #666; }
+    .item button { background: #d9534f; margin-top: 5px; }
+    .item button:hover { background: #c9302c; }
   </style>
 </head>
 <body>
@@ -94,7 +99,8 @@
       });
 
       const result = await res.json();
-      document.getElementById("resultado").innerText = JSON.stringify(result, null, 2);
+      alert(JSON.stringify(result, null, 2));
+      cargarListado(data.tipo); // refrescar la lista automáticamente
     });
 
     // Listar libros o lecciones
@@ -105,16 +111,42 @@
         }
       });
       const docs = await res.json();
+      const container = document.getElementById("resultado");
+      container.innerHTML = "";
+
       if (!Array.isArray(docs)) {
-        document.getElementById("resultado").innerText = "Error: " + JSON.stringify(docs);
+        container.innerText = "Error: " + JSON.stringify(docs);
         return;
       }
 
-      let html = `=== ${tipo.toUpperCase()} ===\n\n`;
       docs.forEach(d => {
-        html += `ID: ${d.id}\nTítulo: ${d.titulo}\n---\n`;
+        const div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = `
+          <h3>${d.titulo}</h3>
+          <small>ID: ${d.id}</small><br>
+          <button onclick="eliminarDoc('${tipo}', '${d.id}')">🗑 Eliminar</button>
+        `;
+        container.appendChild(div);
       });
-      document.getElementById("resultado").innerText = html;
+    }
+
+    // Eliminar documento
+    async function eliminarDoc(tipo, id) {
+      if (!confirm("¿Seguro que deseas eliminar este documento?")) return;
+
+      const res = await fetch(`${API_BASE}/eliminar`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("accessToken")}`
+        },
+        body: JSON.stringify({ tipo, id })
+      });
+
+      const result = await res.json();
+      alert(JSON.stringify(result, null, 2));
+      cargarListado(tipo); // refrescar listado
     }
   </script>
 </body>
