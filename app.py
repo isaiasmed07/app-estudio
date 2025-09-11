@@ -364,9 +364,12 @@ AUTH0_CLIENT_ID = os.environ.get("AUTH0_CLIENT_ID", "")
 
 # Lista blanca de profesores desde variables de entorno (Render)
 PROFESSOR_EMAILS = {
-    e.strip().lower() for e in (os.getenv("PROFESSOR_EMAILS", "").split(","))
+    e.strip().lower()
+    for e in (os.getenv("PROFESSOR_EMAILS", "").split(","))
     if e.strip()
 }
+print("✅ Lista de profesores cargada:", PROFESSOR_EMAILS)
+
 
 def is_professor(email: str) -> bool:
     """Valida si un email está autorizado como profesor."""
@@ -419,12 +422,18 @@ def get_email_from_request():
         token = auth.split(" ", 1)[1]
         try:
             payload = verify_auth0_token(token)
-            return payload.get("email")
+            email = payload.get("email")
+            print(f"[auth0 verify success] Email extraído del token: {email}")
+            return email
         except Exception as e:
             print("[auth0 verify error]", str(e))
             return None
+
+    # fallback (menos seguro)
     email = (request.args.get("email") or (request.json.get("email") if request.is_json else None))
+    print(f"[fallback email] Email recibido desde query/body: {email}")
     return email
+
 
 # Ruta para agregar (crear) libro o lección
 @app.route('/api/admin/agregar', methods=['POST'])
