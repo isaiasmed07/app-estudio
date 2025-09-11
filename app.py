@@ -725,12 +725,32 @@ def obtener_rol():
     if request.method == 'OPTIONS':
         return '', 200  # Preflight CORS
 
-    email = (request.args.get('email') or "").strip().lower()
+    email = None
+
+    # 1. Intentar extraer de query param
+    if request.args.get("email"):
+        email = request.args.get("email").strip().lower()
+
+    # 2. Intentar extraer de Authorization header (id_token de Auth0)
     if not email:
-        return jsonify({"error": "Falta el parámetro 'email'"}), 400
+        auth = request.headers.get("Authorization", None)
+        if auth and auth.startswith("Bearer "):
+            token = auth.split(" ", 1)[1]
+            try:
+                payload = verify_auth0_token(token)  # usamos la función ya definida en tu backend
+                email = (payload.get("email") or "").strip().lower()
+            except Exception as e:
+                print("[/api/rol] Error verificando token:", str(e))
+
+    if not email:
+        return jsonify({"error": "No se pudo obtener email"}), 400
 
     es_profe = email in PROFESSOR_EMAILS
-    return jsonify({"rol": "profesor" if es_profe else "alumno"}), 200
+    return jsonify({
+        "email": email,
+        "rol": "profesor" if es_profe else "alumno"
+    }), 200
+
 
 
 
